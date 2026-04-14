@@ -73,4 +73,8 @@ public class UserService {
 
         return userRepository.save(existingUser);
     }
+
+    public User getUser(Integer authenticatedUserId) {
+        return userRepository.getReferenceById(authenticatedUserId);
+    }
 }

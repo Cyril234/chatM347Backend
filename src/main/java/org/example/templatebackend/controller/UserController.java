@@ -41,8 +41,11 @@ public class UserController {
     public ResponseEntity<?> createUser(@RequestBody RegisterUserRequest request) {
         try {
             User user = userService.addUser(request.displayName(), request.eMail(), request.password());
+            String sessionToken = sessionTokenService.createForUser(user).getToken();
+
             return ResponseEntity
                     .created(URI.create("/user/" + user.getId()))
+                    .header(HttpHeaders.SET_COOKIE, createSessionCookie(sessionToken).toString())
                     .body(new RegisterUserResponse(user.getId()));
         }catch (EmailAlreadyExistsException e){
             return ResponseEntity.badRequest().body(Map.of("error", "E-Mail already exists"));
@@ -77,6 +80,16 @@ public class UserController {
         try {
             User updatedUser = userService.updateUser(authenticatedUser.id(), user);
             return ResponseEntity.ok().body(updatedUser);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getUser(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        try {
+            User user = userService.getUser(authenticatedUser.id());
+            return ResponseEntity.ok().body(user);
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
