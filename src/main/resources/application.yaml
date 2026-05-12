@@ -11,3 +11,6 @@ spring:
     database-platform: org.hibernate.dialect.MariaDBDialect
     hibernate:
       ddl-auto: update
+
+  mongodb:
+    uri: mongodb://root:1234@localhost/WeatherMeassuresVorlage?authSource=admin
