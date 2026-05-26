@@ -1,4 +1,4 @@
-name: Backend CI
+name: Chattrix-Backend CI
 
 on:
   pull_request:
