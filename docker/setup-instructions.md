@@ -9,7 +9,7 @@ cd docker
 
 ## 2. Start/Create containers
 
-docker compose --env-file .env up -d
+COMPOSE_PROJECT_NAME=chattrix-backend-local docker compose up -d
 
 ## 3. Start chattrix-backend
 
