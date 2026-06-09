@@ -2,7 +2,7 @@ package ch.bbw.chattrix.service;
 
 import ch.bbw.chattrix.exception.EmailAlreadyExistsException;
 import ch.bbw.chattrix.exception.UsernameOrPasswordWrongException;
-import ch.bbw.chattrix.entity.User;
+import ch.bbw.chattrix.entity.mariadb.User;
 import ch.bbw.chattrix.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

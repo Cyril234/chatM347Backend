@@ -1,6 +1,6 @@
-package ch.bbw.chattrix.chat.repository;
+package ch.bbw.chattrix.repository;
 
-import ch.bbw.chattrix.chat.model.Chat;
+import ch.bbw.chattrix.entity.mongodb.Chat;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;

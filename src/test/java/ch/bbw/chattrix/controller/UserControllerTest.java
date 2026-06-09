@@ -1,9 +1,9 @@
 package ch.bbw.chattrix.controller;
 
-import ch.bbw.chattrix.dto.LoginUserRequest;
-import ch.bbw.chattrix.dto.RegisterUserRequest;
-import ch.bbw.chattrix.entity.SessionToken;
-import ch.bbw.chattrix.entity.User;
+import ch.bbw.chattrix.dto.authorization.LoginUserRequest;
+import ch.bbw.chattrix.dto.authorization.RegisterUserRequest;
+import ch.bbw.chattrix.entity.mariadb.SessionToken;
+import ch.bbw.chattrix.entity.mariadb.User;
 import ch.bbw.chattrix.exception.UsernameOrPasswordWrongException;
 import ch.bbw.chattrix.service.SessionTokenService;
 import ch.bbw.chattrix.service.UserService;

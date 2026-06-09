@@ -1,4 +1,4 @@
-package ch.bbw.chattrix.chat.model;
+package ch.bbw.chattrix.entity;
 
 import lombok.Getter;
 import lombok.Setter;

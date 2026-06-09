@@ -1,7 +1,7 @@
 package ch.bbw.chattrix.service;
 
-import ch.bbw.chattrix.entity.SessionToken;
-import ch.bbw.chattrix.entity.User;
+import ch.bbw.chattrix.entity.mariadb.SessionToken;
+import ch.bbw.chattrix.entity.mariadb.User;
 import ch.bbw.chattrix.repository.SessionTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

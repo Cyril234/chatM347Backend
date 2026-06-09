@@ -1,7 +1,7 @@
 package ch.bbw.chattrix.repository;
 
-import ch.bbw.chattrix.entity.SessionToken;
-import ch.bbw.chattrix.entity.User;
+import ch.bbw.chattrix.entity.mariadb.SessionToken;
+import ch.bbw.chattrix.entity.mariadb.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

@@ -1,5 +1,8 @@
-package ch.bbw.chattrix.chat.model;
+package ch.bbw.chattrix.entity.mongodb;
 
+import ch.bbw.chattrix.entity.Member;
+import ch.bbw.chattrix.entity.Message;
+import ch.bbw.chattrix.entity.Meta;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;

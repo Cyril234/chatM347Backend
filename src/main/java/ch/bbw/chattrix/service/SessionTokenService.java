@@ -1,8 +1,8 @@
 package ch.bbw.chattrix.service;
 
-import ch.bbw.chattrix.entity.SessionToken;
+import ch.bbw.chattrix.entity.mariadb.SessionToken;
 import ch.bbw.chattrix.repository.SessionTokenRepository;
-import ch.bbw.chattrix.entity.User;
+import ch.bbw.chattrix.entity.mariadb.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

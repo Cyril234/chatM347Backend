@@ -1,4 +1,4 @@
-package ch.bbw.chattrix.entity;
+package ch.bbw.chattrix.entity.mariadb;
 
 import jakarta.persistence.*;
 

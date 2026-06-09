@@ -1,7 +1,10 @@
 package ch.bbw.chattrix.controller;
 
-import ch.bbw.chattrix.dto.*;
-import ch.bbw.chattrix.entity.User;
+import ch.bbw.chattrix.dto.authorization.LoginUserRequest;
+import ch.bbw.chattrix.dto.authorization.LoginUserResponse;
+import ch.bbw.chattrix.dto.authorization.RegisterUserRequest;
+import ch.bbw.chattrix.dto.authorization.RegisterUserResponse;
+import ch.bbw.chattrix.entity.mariadb.User;
 import ch.bbw.chattrix.exception.EmailAlreadyExistsException;
 import ch.bbw.chattrix.exception.UsernameOrPasswordWrongException;
 import ch.bbw.chattrix.security.AuthenticatedUser;

@@ -1,12 +1,12 @@
-package ch.bbw.chattrix.chat.service;
+package ch.bbw.chattrix.service;
 
-import ch.bbw.chattrix.chat.dto.AddChatDTO;
-import ch.bbw.chattrix.chat.dto.ChatSummaryDto;
-import ch.bbw.chattrix.chat.dto.SendMessageDTO;
-import ch.bbw.chattrix.chat.model.Chat;
-import ch.bbw.chattrix.chat.model.Message;
-import ch.bbw.chattrix.chat.model.Meta;
-import ch.bbw.chattrix.chat.repository.ChatRepository;
+import ch.bbw.chattrix.dto.chat.ChatGroupRequest;
+import ch.bbw.chattrix.dto.chat.ChatGroupResponse;
+import ch.bbw.chattrix.dto.chat.ChatRequest;
+import ch.bbw.chattrix.entity.mongodb.Chat;
+import ch.bbw.chattrix.entity.Message;
+import ch.bbw.chattrix.entity.Meta;
+import ch.bbw.chattrix.repository.ChatRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -33,15 +33,15 @@ public class ChatService {
         return chat;
     }
 
-    public List<ChatSummaryDto> getAllMetadata(int userId) {
+    public List<ChatGroupResponse> getAllMetadata(int userId) {
         List<Chat> chat = chatRepository.findAllByUserId(userId);
 
         return chat.stream()
-                .map(c -> new ChatSummaryDto(c.getChatId(), c.getMeta().getName()))
+                .map(c -> new ChatGroupResponse(c.getChatId(), c.getMeta().getName()))
                 .toList();
     }
 
-    public Chat addChat(AddChatDTO newChat, int userId ) {
+    public Chat addChat(ChatGroupRequest newChat, int userId ) {
         System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         if (newChat.members() == null || newChat.members().stream().noneMatch(member -> member.getMembers_id() == userId)) {
             System.out.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
@@ -63,7 +63,7 @@ public class ChatService {
         return chatRepository.save(chat);
     }
 
-    public Chat sendMessage(SendMessageDTO messageDto, int userId) {
+    public Chat sendMessage(ChatRequest messageDto, int userId) {
 
         Chat chat = chatRepository.findById(messageDto.chatId())
                 .orElseThrow(() -> new RuntimeException("Chat nicht gefunden mit ID: " + messageDto.chatId()));

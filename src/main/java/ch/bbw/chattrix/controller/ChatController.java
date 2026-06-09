@@ -1,8 +1,8 @@
-package ch.bbw.chattrix.chat.controller;
+package ch.bbw.chattrix.controller;
 
-import ch.bbw.chattrix.chat.dto.AddChatDTO;
-import ch.bbw.chattrix.chat.dto.SendMessageDTO;
-import ch.bbw.chattrix.chat.service.ChatService;
+import ch.bbw.chattrix.dto.chat.ChatGroupRequest;
+import ch.bbw.chattrix.dto.chat.ChatRequest;
+import ch.bbw.chattrix.service.ChatService;
 import ch.bbw.chattrix.security.AuthenticatedUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,7 +41,7 @@ public class ChatController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addChat(@AuthenticationPrincipal AuthenticatedUser authenticatedUser, @RequestBody AddChatDTO newChat) {
+    public ResponseEntity<?> addChat(@AuthenticationPrincipal AuthenticatedUser authenticatedUser, @RequestBody ChatGroupRequest newChat) {
         try {
             System.out.println("ooooooooooooooooooooooooooooooooooooooooooooooooooooo");
 
@@ -57,7 +57,7 @@ public class ChatController {
     }
 
     @PostMapping("/sendMessage")
-    public ResponseEntity<?> sendMessage(@AuthenticationPrincipal AuthenticatedUser authenticatedUser, @RequestBody SendMessageDTO message) {
+    public ResponseEntity<?> sendMessage(@AuthenticationPrincipal AuthenticatedUser authenticatedUser, @RequestBody ChatRequest message) {
         try {
             return ResponseEntity.ok().body(chatService.sendMessage(message, authenticatedUser.id()));
         }catch (RuntimeException e){
