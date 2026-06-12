@@ -8,12 +8,13 @@ on:
     branches:
       - main
 
+env:
+  RABBITMQ_PORT: 5672
+  RABBITMQ_HOST: localhost
 
 jobs:
-
   changes:
     runs-on: ubuntu-latest
-
     outputs:
       shared: ${{ steps.filter.outputs.shared }}
       authentication-service: ${{ steps.filter.outputs.authentication-service }}
