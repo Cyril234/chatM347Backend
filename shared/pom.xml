@@ -1,0 +1,13 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.chattrix</groupId>
+        <artifactId>chattrix-backend-microservices</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>shared</artifactId>
+    <packaging>jar</packaging>
+
+</project>

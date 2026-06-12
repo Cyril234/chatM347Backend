@@ -3,12 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>ch.chattrix</groupId>
+        <artifactId>chattrix-backend-microservices</artifactId>
+        <version>1.0.0</version>
     </parent>
-    <groupId>ch.chattrix</groupId>
     <artifactId>authentication-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>authentication-service</name>

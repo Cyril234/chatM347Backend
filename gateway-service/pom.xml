@@ -7,13 +7,10 @@
 
 	<!-- Spring Boot Parent -->
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
-		<relativePath/>
+		<groupId>ch.chattrix</groupId>
+		<artifactId>chattrix-backend-microservices</artifactId>
+		<version>1.0.0</version>
 	</parent>
-
-	<groupId>ch.chattrix</groupId>
 	<artifactId>gateway-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>gateway-service</name>

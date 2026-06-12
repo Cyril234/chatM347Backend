@@ -1,0 +1,31 @@
+<project>
+<modelVersion>4.0.0</modelVersion>
+
+<groupId>ch.chattrix</groupId>
+<artifactId>chattrix-backend-microservices</artifactId>
+<version>1.0.0</version>
+<packaging>pom</packaging>
+
+<modules>
+    <module>shared</module>
+    <module>authentication-service</module>
+    <module>chat-service</module>
+    <module>websocket-service</module>
+    <module>gateway-service</module>
+    <module>user-service</module>
+    <module>shared</module>
+</modules>
+
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>3.3.0</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+</project>
