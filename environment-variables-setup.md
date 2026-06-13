@@ -4,7 +4,7 @@ Once you arrived at this place click environment variables and add:
 
 ---
 
-# 🔐 authentication-service
+# authentication-service
 
 - RABBITMQ_HOST
 - RABBITMQ_PORT
@@ -19,7 +19,7 @@ Once you arrived at this place click environment variables and add:
 
 ---
 
-# 👤 user-service
+# user-service
 
 - RABBITMQ_HOST
 - RABBITMQ_PORT
@@ -34,7 +34,7 @@ Once you arrived at this place click environment variables and add:
 
 ---
 
-# 💬 chat-service
+# chat-service
 
 - RABBITMQ_HOST
 - RABBITMQ_PORT
@@ -52,7 +52,7 @@ Once you arrived at this place click environment variables and add:
 
 ---
 
-# 🌐 gateway-service
+# gateway-service
 
 - RABBITMQ_HOST
 - RABBITMQ_PORT
@@ -62,7 +62,7 @@ Once you arrived at this place click environment variables and add:
 
 ---
 
-# 🔌 websocket-service
+# websocket-service
 
 - RABBITMQ_HOST
 - RABBITMQ_PORT
