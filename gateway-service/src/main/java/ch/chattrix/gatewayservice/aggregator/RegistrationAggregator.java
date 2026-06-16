@@ -2,7 +2,7 @@ package ch.chattrix.gatewayservice.aggregator;
 
 import ch.chattrix.shared.event.user.AuthenticationRegisterResultEvent;
 import ch.chattrix.shared.event.user.UserProfileResultEvent;
-import ch.chattrix.shared.response.BasicApiResponse;
+import ch.chattrix.shared.response.ApiResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -12,56 +12,65 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RegistrationAggregator {
 
-    private final Map<String, RegistrationResult> store = new ConcurrentHashMap<>();
-    private final Map<String, CompletableFuture<BasicApiResponse>> futures = new ConcurrentHashMap<>();
+    private final Map<String, RegistrationState> store = new ConcurrentHashMap<>();
+    private final Map<String, CompletableFuture<ApiResponse<Void>>> futures = new ConcurrentHashMap<>();
 
-    public CompletableFuture<BasicApiResponse> createRegistration(String correlationId) {
-        store.put(correlationId, new RegistrationResult());
-        CompletableFuture<BasicApiResponse> future = new CompletableFuture<>();
+    public CompletableFuture<ApiResponse<Void>> createRegistration(String correlationId) {
+        store.put(correlationId, new RegistrationState());
+        CompletableFuture<ApiResponse<Void>> future = new CompletableFuture<>();
         futures.put(correlationId, future);
         return future;
     }
 
     public void handleAuth(String correlationId, AuthenticationRegisterResultEvent event) {
 
-        RegistrationResult result = store.get(correlationId);
-        if (result == null) return;
+        RegistrationState state = store.get(correlationId);
+        if (state == null) return;
 
-        result.setAuthentication(event);
-        checkDone(correlationId, result);
+        state.setAuth(event);
+        tryComplete(correlationId, state);
     }
 
     public void handleUser(String correlationId, UserProfileResultEvent event) {
 
-        RegistrationResult result = store.get(correlationId);
-        if (result == null) return;
+        RegistrationState state = store.get(correlationId);
+        if (state == null) return;
 
-        result.setUser(event);
-        checkDone(correlationId, result);
+        state.setUser(event);
+        tryComplete(correlationId, state);
     }
 
-    private void checkDone(String correlationId, RegistrationResult result) {
+    private void tryComplete(String correlationId, RegistrationState state) {
 
-        if (result.getAuthentication() == null || result.getUser() == null) {
+        if (state.getAuth() == null || state.getUser() == null) {
             return;
         }
 
         boolean success =
-                result.getAuthentication().isSuccess() &&
-                        result.getUser().isSuccess();
+                state.getAuth().isSuccess() &&
+                        state.getUser().isSuccess();
 
         String message;
 
-        if (!result.getAuthentication().isSuccess()) {
-            message = result.getAuthentication().getErrorMessage();
-        } else if (!result.getUser().isSuccess()) {
-            message = result.getUser().getErrorMessage();
+        if (!state.getAuth().isSuccess()) {
+            message = state.getAuth().getErrorMessage();
+        } else if (!state.getUser().isSuccess()) {
+            message = state.getUser().getErrorMessage();
         } else {
-            message = "User registered successfully";
+            message = "USER_REGISTERED_SUCCESSFULLY";
         }
 
-        futures.remove(correlationId)
-                .complete(new BasicApiResponse(success, message));
+        ApiResponse<Void> response = new ApiResponse<>();
+        response.setSuccess(success);
+        response.setMessage(message);
+        response.setData(null);
+
+        CompletableFuture<ApiResponse<Void>> future =
+                futures.remove(correlationId);
+
+        if (future != null) {
+            future.complete(response);
+        }
 
         store.remove(correlationId);
     }

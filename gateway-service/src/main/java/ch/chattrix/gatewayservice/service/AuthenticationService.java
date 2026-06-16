@@ -8,11 +8,11 @@ import ch.chattrix.shared.command.user.UserLoginCommand;
 import ch.chattrix.shared.command.user.UserProfileCommand;
 import ch.chattrix.shared.dto.user.LoginUserRequest;
 import ch.chattrix.shared.dto.user.RegisterUserRequest;
-import ch.chattrix.shared.response.BasicApiResponse;
-import ch.chattrix.shared.response.LoginApiResponse;
+import ch.chattrix.shared.response.ApiResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -22,14 +22,17 @@ public class AuthenticationService {
     private final RegistrationAggregator registrationAggregator;
     private final LoginAggregator loginAggregator;
 
-    public AuthenticationService(RabbitCommandPublisher publisher,
-                                 RegistrationAggregator registrationAggregator, LoginAggregator loginAggregator) {
+    public AuthenticationService(
+            RabbitCommandPublisher publisher,
+            RegistrationAggregator registrationAggregator,
+            LoginAggregator loginAggregator
+    ) {
         this.publisher = publisher;
         this.registrationAggregator = registrationAggregator;
         this.loginAggregator = loginAggregator;
     }
 
-    public BasicApiResponse register(RegisterUserRequest request) {
+    public ApiResponse<Void> register(RegisterUserRequest request) {
 
         String correlationId = UUID.randomUUID().toString();
         UUID userUuid = UUID.randomUUID();
@@ -53,14 +56,22 @@ public class AuthenticationService {
                 correlationId
         );
 
+        return getVoidApiResponse(future);
+    }
+
+    private ApiResponse<Void> getVoidApiResponse(CompletableFuture<ApiResponse<Void>> future) {
         try {
             return future.get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
-            return new BasicApiResponse(false, "Timeout or error during registration");
+            ApiResponse<Void> response = new ApiResponse<>();
+            response.setSuccess(false);
+            response.setMessage("TIMEOUT_OR_ERROR");
+            response.setData(null);
+            return response;
         }
     }
 
-    public LoginApiResponse login(LoginUserRequest request) {
+    public ApiResponse<Void> login(LoginUserRequest request) {
 
         String correlationId = UUID.randomUUID().toString();
 
@@ -74,10 +85,6 @@ public class AuthenticationService {
                 correlationId
         );
 
-        try {
-            return future.get(5, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            return new LoginApiResponse(false, null, null, "Timeout or error during login");
-        }
+        return getVoidApiResponse(future);
     }
 }

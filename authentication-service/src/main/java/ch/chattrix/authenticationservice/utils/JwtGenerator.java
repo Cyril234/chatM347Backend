@@ -12,12 +12,10 @@ public class JwtGenerator {
 
     private final Key signingKey;
     private final long accessTokenExpirationMillis;
-    private final long refreshTokenExpirationMillis;
 
-    public JwtGenerator(String secret, long accessTokenExpirationMillis, long refreshTokenExpirationMillis) {
+    public JwtGenerator(String secret, long accessTokenExpirationMillis) {
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpirationMillis = accessTokenExpirationMillis;
-        this.refreshTokenExpirationMillis = refreshTokenExpirationMillis;
     }
 
     public String generateAccessToken(String userUuid, String email) {
@@ -30,19 +28,6 @@ public class JwtGenerator {
                 .claim("type", "access")
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + accessTokenExpirationMillis))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public String generateRefreshToken(String userUuid) {
-
-        long now = System.currentTimeMillis();
-
-        return Jwts.builder()
-                .setSubject(userUuid)
-                .claim("type", "refresh")
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + refreshTokenExpirationMillis))
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }

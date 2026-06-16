@@ -1,7 +1,7 @@
 package ch.chattrix.gatewayservice.aggregator;
 
 import ch.chattrix.shared.event.user.UserLoginResultEvent;
-import ch.chattrix.shared.response.LoginApiResponse;
+import ch.chattrix.shared.response.ApiResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -11,37 +11,27 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class LoginAggregator {
 
-    private final Map<String, CompletableFuture<LoginApiResponse>> futures =
+    private final Map<String, CompletableFuture<ApiResponse<Void>>> futures =
             new ConcurrentHashMap<>();
 
-    public CompletableFuture<LoginApiResponse> createLogin(String correlationId) {
-
-        CompletableFuture<LoginApiResponse> future = new CompletableFuture<>();
+    public CompletableFuture<ApiResponse<Void>> createLogin(String correlationId) {
+        CompletableFuture<ApiResponse<Void>> future = new CompletableFuture<>();
         futures.put(correlationId, future);
-
         return future;
     }
 
-    public void handleLogin(
-            String correlationId,
-            UserLoginResultEvent event
-    ) {
+    public void completeLogin(String correlationId, UserLoginResultEvent event) {
 
-        CompletableFuture<LoginApiResponse> future =
+        CompletableFuture<ApiResponse<Void>> future =
                 futures.remove(correlationId);
 
-        if (future == null) {
-            return;
-        }
+        if (future == null) return;
 
-        future.complete(
-                new LoginApiResponse(
-                        event.isSuccess(),
-                        null,
-                        null, event.isSuccess()
-                        ? "Login successful"
-                        : event.getErrorMessage()
-                )
-        );
+        ApiResponse<Void> response = new ApiResponse<>();
+        response.setSuccess(event.isSuccess());
+        response.setMessage(event.isSuccess() ? "LOGIN_SUCCESS" : event.getErrorMessage());
+        response.setData(null);
+
+        future.complete(response);
     }
 }

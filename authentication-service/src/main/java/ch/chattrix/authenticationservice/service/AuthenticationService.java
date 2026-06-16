@@ -5,9 +5,8 @@ import ch.chattrix.authenticationservice.entity.UserCredential;
 import ch.chattrix.authenticationservice.repository.RefreshTokenRepository;
 import ch.chattrix.authenticationservice.repository.UserCredentialRepository;
 import ch.chattrix.authenticationservice.utils.JwtGenerator;
-import ch.chattrix.shared.dto.user.LoginUserResponse;
-import ch.chattrix.shared.response.LoginApiResponse;
-import org.springframework.security.authentication.BadCredentialsException;
+import ch.chattrix.shared.response.ApiResponse;
+import ch.chattrix.shared.types.LoginData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,46 +38,43 @@ public class AuthenticationService {
         return encoder.encode(password);
     }
 
-    public boolean register(String email, String password, UUID userUuid) {
-        String generatedRefreshToken =
-                jwtGenerator.generateRefreshToken(userUuid.toString());
+    public ApiResponse<Void> register(String email, String password, UUID userUuid) {
 
-        UserCredential newUserCredential = new UserCredential();
-        newUserCredential.setEmail(email);
-        newUserCredential.setUserUuid(userUuid);
-        newUserCredential.setPasswordHash(hashPassword(password));
-        newUserCredential.setCreatedAt(new Date());
-        newUserCredential.setUpdatedAt(new Date());
+        try {
+            String randomRefreshToken = UUID.randomUUID().toString();
 
-        userCredentialRepository.save(newUserCredential);
+            UserCredential credential = new UserCredential();
+            credential.setEmail(email);
+            credential.setUserUuid(userUuid);
+            credential.setPasswordHash(hashPassword(password));
+            credential.setCreatedAt(new Date());
+            credential.setUpdatedAt(new Date());
 
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUserUuid(userUuid);
+            userCredentialRepository.save(credential);
 
-        refreshToken.setToken(generatedRefreshToken);
+            RefreshToken refreshToken = new RefreshToken();
+            refreshToken.setUserUuid(userUuid);
+            refreshToken.setToken(randomRefreshToken);
+            refreshToken.setCreatedAt(new Date());
+            refreshToken.setExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(14))));
 
-        refreshToken.setCreatedAt(new Date());
+            refreshTokenRepository.save(refreshToken);
 
-        refreshToken.setExpiresAt(
-                Date.from(Instant.now().plus(Duration.ofDays(14)))
-        );
+            return new ApiResponse<>(true, "REGISTER_SUCCESS", null);
 
-        refreshTokenRepository.save(refreshToken);
-
-        return true;
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "REGISTER_FAILED", null);
+        }
     }
 
     @Transactional
-    public LoginApiResponse login(String email, String password) {
+    public ApiResponse<LoginData> login(String email, String password) {
 
-        boolean success = false;
         UserCredential user = userCredentialRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new BadCredentialsException("Invalid credentials")
-                );
+                .orElse(null);
 
-        if (!encoder.matches(password, user.getPasswordHash())) {
-            throw new BadCredentialsException("Invalid credentials");
+        if (user == null || !encoder.matches(password, user.getPasswordHash())) {
+            return new ApiResponse<>(false, "INVALID_CREDENTIALS", null);
         }
 
         String accessToken = jwtGenerator.generateAccessToken(
@@ -86,30 +82,20 @@ public class AuthenticationService {
                 user.getEmail()
         );
 
-        String generatedRefreshToken = jwtGenerator.generateRefreshToken(
-                user.getUserUuid().toString()
-        );
+        String refreshToken = UUID.randomUUID().toString();
 
-        refreshTokenRepository.deleteByUserUuid(
-                user.getUserUuid()
-        );
+        RefreshToken entity = new RefreshToken();
+        entity.setUserUuid(user.getUserUuid());
+        entity.setToken(refreshToken);
+        entity.setCreatedAt(new Date());
+        entity.setExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(14))));
 
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setUserUuid(user.getUserUuid());
-        refreshToken.setToken(generatedRefreshToken);
-        refreshToken.setCreatedAt(new Date());
+        refreshTokenRepository.save(entity);
 
-        refreshToken.setExpiresAt(
-                Date.from(Instant.now().plus(Duration.ofDays(14)))
-        );
+        LoginData data = new LoginData();
+        data.setAccessToken(accessToken);
+        data.setRefreshToken(refreshToken);
 
-        refreshTokenRepository.save(refreshToken);
-        success = true;
-
-        LoginApiResponse loginApiResponse = new LoginApiResponse();
-        loginApiResponse.setSuccess(success);
-        loginApiResponse.setAccessToken(accessToken);
-        loginApiResponse.setRefreshToken(refreshToken.getToken());
-        return loginApiResponse;
+        return new ApiResponse<>(true, "LOGIN_SUCCESS", data);
     }
 }

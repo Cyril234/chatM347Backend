@@ -3,8 +3,8 @@ package ch.chattrix.gatewayservice.rabbitmq;
 import ch.chattrix.gatewayservice.aggregator.LoginAggregator;
 import ch.chattrix.gatewayservice.aggregator.RegistrationAggregator;
 import ch.chattrix.shared.event.user.AuthenticationRegisterResultEvent;
-import ch.chattrix.shared.event.user.UserLoginResultEvent;
 import ch.chattrix.shared.event.user.UserProfileResultEvent;
+import ch.chattrix.shared.event.user.UserLoginResultEvent;
 import ch.chattrix.shared.rabbitmq.Queues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
@@ -20,19 +20,21 @@ public class RabbitResultListener {
 
     public RabbitResultListener(
             RegistrationAggregator registrationAggregator,
-            ObjectMapper objectMapper,
-            LoginAggregator loginAggregator
+            LoginAggregator loginAggregator,
+            ObjectMapper objectMapper
     ) {
         this.registrationAggregator = registrationAggregator;
-        this.objectMapper = objectMapper;
         this.loginAggregator = loginAggregator;
+        this.objectMapper = objectMapper;
     }
 
     @RabbitListener(queues = Queues.AUTH_REGISTER_RESULT_QUEUE)
-    public void handleAuth(Message message) throws Exception {
+    public void handleAuthRegister(Message message) throws Exception {
 
         String correlationId =
                 message.getMessageProperties().getCorrelationId();
+
+        if (correlationId == null) return;
 
         AuthenticationRegisterResultEvent event =
                 objectMapper.readValue(
@@ -44,10 +46,12 @@ public class RabbitResultListener {
     }
 
     @RabbitListener(queues = Queues.USER_CREATE_RESULT_QUEUE)
-    public void handleUser(Message message) throws Exception {
+    public void handleUserCreate(Message message) throws Exception {
 
         String correlationId =
                 message.getMessageProperties().getCorrelationId();
+
+        if (correlationId == null) return;
 
         UserProfileResultEvent event =
                 objectMapper.readValue(
@@ -59,17 +63,16 @@ public class RabbitResultListener {
     }
 
     @RabbitListener(queues = Queues.AUTH_LOGIN_RESULT_QUEUE)
-    public void handleLogin(Message message) throws Exception {
+    public void handleAuthLogin(Message message) throws Exception {
 
         String correlationId =
                 message.getMessageProperties().getCorrelationId();
 
-        UserLoginResultEvent event =
-                objectMapper.readValue(
-                        message.getBody(),
-                        UserLoginResultEvent.class
-                );
+        if (correlationId == null) return;
 
-        loginAggregator.handleLogin(correlationId, event);
+        UserLoginResultEvent event =
+                objectMapper.readValue(message.getBody(), UserLoginResultEvent.class);
+
+        loginAggregator.completeLogin(correlationId, event);
     }
 }

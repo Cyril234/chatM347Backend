@@ -5,9 +5,9 @@ import ch.chattrix.shared.event.user.UserProfileResultEvent;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
-public class RegistrationResult {
-    private AuthenticationRegisterResultEvent authentication;
+@Setter
+public class RegistrationState {
+    private AuthenticationRegisterResultEvent auth;
     private UserProfileResultEvent user;
 }

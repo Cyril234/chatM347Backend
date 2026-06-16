@@ -17,39 +17,27 @@ public class RabbitCommandPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void sendRegisterRequest(AuthenticationRegisterCommand cmd, String correlationId) {
+    private void send(Object cmd, String routingKey, String correlationId) {
         rabbitTemplate.convertAndSend(
                 Exchanges.USER,
-                RoutingKeys.AUTH_REGISTER,
+                routingKey,
                 cmd,
                 msg -> {
                     msg.getMessageProperties().setCorrelationId(correlationId);
                     return msg;
                 }
         );
+    }
+
+    public void sendRegisterRequest(AuthenticationRegisterCommand cmd, String correlationId) {
+        send(cmd, RoutingKeys.AUTH_REGISTER, correlationId);
     }
 
     public void sendCreateUserRequest(UserProfileCommand cmd, String correlationId) {
-        rabbitTemplate.convertAndSend(
-                Exchanges.USER,
-                RoutingKeys.USER_CREATE,
-                cmd,
-                msg -> {
-                    msg.getMessageProperties().setCorrelationId(correlationId);
-                    return msg;
-                }
-        );
+        send(cmd, RoutingKeys.USER_CREATE, correlationId);
     }
 
     public void sendLoginRequest(UserLoginCommand cmd, String correlationId) {
-        rabbitTemplate.convertAndSend(
-                Exchanges.USER,
-                RoutingKeys.AUTH_LOGIN,
-                cmd,
-                msg -> {
-                    msg.getMessageProperties().setCorrelationId(correlationId);
-                    return msg;
-                }
-        );
+        send(cmd, RoutingKeys.AUTH_LOGIN, correlationId);
     }
 }

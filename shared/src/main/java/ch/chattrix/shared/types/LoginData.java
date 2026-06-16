@@ -1,15 +1,15 @@
-package ch.chattrix.shared.response;
+package ch.chattrix.shared.types;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BasicApiResponse {
-    private boolean success;
-    private String message;
+@Getter
+@Setter
+public class LoginData {
+    private String accessToken;
+    private String refreshToken;
 }

@@ -1,5 +1,6 @@
 package ch.chattrix.userservice.service;
 
+import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.userservice.entity.User;
 import ch.chattrix.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -16,24 +17,29 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public boolean create(String username, UUID userUuid) {
+    public ApiResponse<Void> create(String username, UUID userUuid) {
 
         if (userRepository.existsById(userUuid)) {
-            return true;
+            return new ApiResponse<>(false, "USER_ALREADY_EXISTS", null);
         }
 
-        if(userRepository.existsByUsername(username)){
-            return true;
+        if (userRepository.existsByUsername(username)) {
+            return new ApiResponse<>(false, "USERNAME_ALREADY_EXISTS", null);
         }
 
-        User user = new User();
-        user.setUserUuid(userUuid);
-        user.setUsername(username);
-        user.setCreatedAt(new Date());
-        user.setUpdatedAt(new Date());
+        try {
+            User user = new User();
+            user.setUserUuid(userUuid);
+            user.setUsername(username);
+            user.setCreatedAt(new Date());
+            user.setUpdatedAt(new Date());
 
-        userRepository.save(user);
+            userRepository.save(user);
 
-        return true;
+            return new ApiResponse<>(true, "USER_CREATED_SUCCESSFULLY", null);
+
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "USER_CREATION_FAILED", null);
+        }
     }
 }

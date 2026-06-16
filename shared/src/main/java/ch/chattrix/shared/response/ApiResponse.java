@@ -9,9 +9,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class LoginApiResponse {
+public class ApiResponse<T> {
     private boolean success;
-    private String accessToken;
-    private String refreshToken;
     private String message;
+    private T data;
 }

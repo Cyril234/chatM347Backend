@@ -5,6 +5,7 @@ import ch.chattrix.shared.event.user.UserProfileResultEvent;
 import ch.chattrix.shared.rabbitmq.Exchanges;
 import ch.chattrix.shared.rabbitmq.Queues;
 import ch.chattrix.shared.rabbitmq.RoutingKeys;
+import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.userservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
@@ -28,36 +29,30 @@ public class UserListener {
     }
 
     @RabbitListener(queues = Queues.USER_CREATE_QUEUE)
-    public void handleRegister(Message message) {
+    public void handleUserCreate(Message message) {
 
-        String correlationId =
-                message.getMessageProperties().getCorrelationId();
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
 
         try {
             UserProfileCommand command =
-                    objectMapper.readValue(
-                            message.getBody(),
-                            UserProfileCommand.class
-                    );
+                    objectMapper.readValue(message.getBody(), UserProfileCommand.class);
 
-            boolean success = userService.create(
-                    command.getUsername(),
-                    command.getUserUuid()
+            ApiResponse<Void> serviceResponse =
+                    userService.create(command.getUsername(), command.getUserUuid());
+
+            UserProfileResultEvent event = new UserProfileResultEvent();
+            event.setSuccess(serviceResponse.isSuccess());
+            event.setErrorMessage(
+                    serviceResponse.isSuccess()
+                            ? null
+                            : serviceResponse.getMessage()
             );
-
-            UserProfileResultEvent result =
-                    new UserProfileResultEvent();
-
-            result.setSuccess(success);
-
-            if (!success) {
-                result.setErrorMessage("User creation failed");
-            }
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
                     RoutingKeys.USER_RESULT_CREATE,
-                    result,
+                    event,
                     msg -> {
                         msg.getMessageProperties().setCorrelationId(correlationId);
                         return msg;
@@ -66,18 +61,16 @@ public class UserListener {
 
         } catch (Exception e) {
 
-            UserProfileResultEvent result =
-                    new UserProfileResultEvent();
-
-            result.setSuccess(false);
-            result.setErrorMessage(
-                    e.getMessage() != null ? e.getMessage() : "Unknown error"
+            UserProfileResultEvent event = new UserProfileResultEvent();
+            event.setSuccess(false);
+            event.setErrorMessage(
+                    e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR"
             );
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
                     RoutingKeys.USER_RESULT_CREATE,
-                    result,
+                    event,
                     msg -> {
                         msg.getMessageProperties().setCorrelationId(correlationId);
                         return msg;

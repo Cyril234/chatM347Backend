@@ -27,10 +27,6 @@ public class JwtValidator {
         return extractClaims(token).getSubject();
     }
 
-    public String getTokenType(String token) {
-        return extractClaims(token).get("type", String.class);
-    }
-
     public boolean isTokenValid(String token) {
         try {
             extractClaims(token);

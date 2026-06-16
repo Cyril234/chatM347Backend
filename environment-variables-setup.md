@@ -18,7 +18,6 @@ Once you arrived at this place click environment variables and add:
 - FRONTEND_URL
 - JWT_SECRET
 - JWT_ACCESS_EXPIRATION
-- JWT_REFRESH_EXPIRATION
 
 ---
 

@@ -11,9 +11,8 @@ public class JwtConfig {
     @Bean
     public JwtGenerator jwtGenerator(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-expiration}") long accessExpiration,
-            @Value("${jwt.refresh-expiration}") long refreshExpiration
+            @Value("${jwt.access-expiration}") long accessExpiration
     ) {
-        return new JwtGenerator(secret, accessExpiration, refreshExpiration);
+        return new JwtGenerator(secret, accessExpiration);
     }
 }

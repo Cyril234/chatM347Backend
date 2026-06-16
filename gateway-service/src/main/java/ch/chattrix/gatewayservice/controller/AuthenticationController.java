@@ -3,8 +3,7 @@ package ch.chattrix.gatewayservice.controller;
 import ch.chattrix.gatewayservice.service.AuthenticationService;
 import ch.chattrix.shared.dto.user.LoginUserRequest;
 import ch.chattrix.shared.dto.user.RegisterUserRequest;
-import ch.chattrix.shared.response.BasicApiResponse;
-import ch.chattrix.shared.response.LoginApiResponse;
+import ch.chattrix.shared.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -23,37 +22,42 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public BasicApiResponse register(@RequestBody RegisterUserRequest request) {
+    public ApiResponse<Void> register(@RequestBody RegisterUserRequest request) {
         return authenticationService.register(request);
     }
 
     @PostMapping("/login")
-    public BasicApiResponse login(@RequestBody LoginUserRequest request, HttpServletResponse response) {
-        LoginApiResponse serviceResponse = authenticationService.login(request);
-        if (serviceResponse.isSuccess()) {
+    public ApiResponse<Void> login(
+            @RequestBody LoginUserRequest request,
+            HttpServletResponse response
+    ) {
 
-            ResponseCookie accessCookie = ResponseCookie.from("accessToken", serviceResponse.getAccessToken())
-                    .httpOnly(true)
-                    .secure(false) //TODO: set on true when the app is on prod.
-                    .path("/")
-                    .sameSite("Lax")
-                    .maxAge(Duration.ofMinutes(60))
-                    .build();
+        ApiResponse<Void> serviceResponse =
+                authenticationService.login(request);
 
-            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", serviceResponse.getRefreshToken())
-                    .httpOnly(true)
-                    .secure(false) //TODO: set on true when the app is on prod.
-                    .path("/")
-                    .sameSite("Lax")
-                    .maxAge(Duration.ofDays(14))
-                    .build();
-
-            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        if (!serviceResponse.isSuccess()) {
+            return serviceResponse;
         }
-        BasicApiResponse basicApiResponse = new BasicApiResponse();
-        basicApiResponse.setSuccess(serviceResponse.isSuccess());
-        basicApiResponse.setMessage(serviceResponse.getMessage());
-        return basicApiResponse;
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", "TEMP")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(Duration.ofMinutes(60))
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "TEMP")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(Duration.ofDays(14))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return serviceResponse;
     }
 }
