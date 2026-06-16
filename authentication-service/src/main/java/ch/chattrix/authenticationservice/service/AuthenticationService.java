@@ -39,6 +39,12 @@ public class AuthenticationService {
     }
 
     public ApiResponse<Void> register(String email, String password, UUID userUuid) {
+        if (userCredentialRepository.findByEmail(email).isPresent()) {
+            return new ApiResponse<>(false, "EMAIL_ALREADY_IN_USE", null);
+        }
+        if (userCredentialRepository.findById(userUuid).isPresent()) {
+            return new ApiResponse<>(false, "USER_ALREADY_EXISTS", null);
+        }
 
         try {
             String randomRefreshToken = UUID.randomUUID().toString();
