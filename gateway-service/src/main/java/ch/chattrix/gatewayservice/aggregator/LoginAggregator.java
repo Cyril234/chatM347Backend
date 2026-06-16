@@ -1,6 +1,6 @@
 package ch.chattrix.gatewayservice.aggregator;
 
-import ch.chattrix.shared.event.user.UserLoginResultEvent;
+import ch.chattrix.shared.event.RabbitMqResultEvent;
 import ch.chattrix.shared.response.ApiResponse;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ public class LoginAggregator {
         return future;
     }
 
-    public void completeLogin(String correlationId, UserLoginResultEvent event) {
+    public void completeLogin(String correlationId, RabbitMqResultEvent event) {
 
         CompletableFuture<ApiResponse<Void>> future =
                 futures.remove(correlationId);

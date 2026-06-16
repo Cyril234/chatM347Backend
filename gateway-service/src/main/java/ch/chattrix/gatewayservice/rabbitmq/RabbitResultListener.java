@@ -2,9 +2,7 @@ package ch.chattrix.gatewayservice.rabbitmq;
 
 import ch.chattrix.gatewayservice.aggregator.LoginAggregator;
 import ch.chattrix.gatewayservice.aggregator.RegistrationAggregator;
-import ch.chattrix.shared.event.user.AuthenticationRegisterResultEvent;
-import ch.chattrix.shared.event.user.UserProfileResultEvent;
-import ch.chattrix.shared.event.user.UserLoginResultEvent;
+import ch.chattrix.shared.event.RabbitMqResultEvent;
 import ch.chattrix.shared.rabbitmq.Queues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
@@ -36,10 +34,10 @@ public class RabbitResultListener {
 
         if (correlationId == null) return;
 
-        AuthenticationRegisterResultEvent event =
+        RabbitMqResultEvent event =
                 objectMapper.readValue(
                         message.getBody(),
-                        AuthenticationRegisterResultEvent.class
+                        RabbitMqResultEvent.class
                 );
 
         registrationAggregator.handleAuth(correlationId, event);
@@ -53,10 +51,10 @@ public class RabbitResultListener {
 
         if (correlationId == null) return;
 
-        UserProfileResultEvent event =
+        RabbitMqResultEvent event =
                 objectMapper.readValue(
                         message.getBody(),
-                        UserProfileResultEvent.class
+                        RabbitMqResultEvent.class
                 );
 
         registrationAggregator.handleUser(correlationId, event);
@@ -70,8 +68,8 @@ public class RabbitResultListener {
 
         if (correlationId == null) return;
 
-        UserLoginResultEvent event =
-                objectMapper.readValue(message.getBody(), UserLoginResultEvent.class);
+        RabbitMqResultEvent event =
+                objectMapper.readValue(message.getBody(), RabbitMqResultEvent.class);
 
         loginAggregator.completeLogin(correlationId, event);
     }

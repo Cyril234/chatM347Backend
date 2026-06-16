@@ -1,7 +1,6 @@
 package ch.chattrix.gatewayservice.aggregator;
 
-import ch.chattrix.shared.event.user.AuthenticationRegisterResultEvent;
-import ch.chattrix.shared.event.user.UserProfileResultEvent;
+import ch.chattrix.shared.event.RabbitMqResultEvent;
 import ch.chattrix.shared.response.ApiResponse;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +21,7 @@ public class RegistrationAggregator {
         return future;
     }
 
-    public void handleAuth(String correlationId, AuthenticationRegisterResultEvent event) {
+    public void handleAuth(String correlationId, RabbitMqResultEvent event) {
 
         RegistrationState state = store.get(correlationId);
         if (state == null) return;
@@ -31,7 +30,7 @@ public class RegistrationAggregator {
         tryComplete(correlationId, state);
     }
 
-    public void handleUser(String correlationId, UserProfileResultEvent event) {
+    public void handleUser(String correlationId, RabbitMqResultEvent event) {
 
         RegistrationState state = store.get(correlationId);
         if (state == null) return;

@@ -3,8 +3,7 @@ package ch.chattrix.authenticationservice.rabbitmq;
 import ch.chattrix.authenticationservice.service.AuthenticationService;
 import ch.chattrix.shared.command.user.AuthenticationRegisterCommand;
 import ch.chattrix.shared.command.user.UserLoginCommand;
-import ch.chattrix.shared.event.user.AuthenticationRegisterResultEvent;
-import ch.chattrix.shared.event.user.UserLoginResultEvent;
+import ch.chattrix.shared.event.RabbitMqResultEvent;
 import ch.chattrix.shared.rabbitmq.Exchanges;
 import ch.chattrix.shared.rabbitmq.Queues;
 import ch.chattrix.shared.rabbitmq.RoutingKeys;
@@ -48,7 +47,7 @@ public class AuthenticationListener {
                             command.getUserUuid()
                     );
 
-            AuthenticationRegisterResultEvent result = new AuthenticationRegisterResultEvent();
+            RabbitMqResultEvent result = new RabbitMqResultEvent();
             result.setSuccess(serviceResponse.isSuccess());
             result.setErrorMessage(serviceResponse.isSuccess() ? null : serviceResponse.getMessage());
 
@@ -64,7 +63,7 @@ public class AuthenticationListener {
 
         } catch (Exception e) {
 
-            AuthenticationRegisterResultEvent result = new AuthenticationRegisterResultEvent();
+            RabbitMqResultEvent result = new RabbitMqResultEvent();
             result.setSuccess(false);
             result.setErrorMessage(e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR");
 
@@ -92,7 +91,7 @@ public class AuthenticationListener {
             ApiResponse<LoginData> serviceResponse =
                     authService.login(command.getEmail(), command.getPassword());
 
-            UserLoginResultEvent result = new UserLoginResultEvent();
+            RabbitMqResultEvent result = new RabbitMqResultEvent();
             result.setSuccess(serviceResponse.isSuccess());
             result.setErrorMessage(
                     serviceResponse.isSuccess()
@@ -112,7 +111,7 @@ public class AuthenticationListener {
 
         } catch (Exception e) {
 
-            UserLoginResultEvent result = new UserLoginResultEvent();
+            RabbitMqResultEvent result = new RabbitMqResultEvent();
             result.setSuccess(false);
             result.setErrorMessage(e.getMessage());
 
