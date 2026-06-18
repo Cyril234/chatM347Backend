@@ -7,6 +7,7 @@ import ch.chattrix.authenticationservice.repository.UserCredentialRepository;
 import ch.chattrix.authenticationservice.utils.JwtGenerator;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.LoginData;
+import ch.chattrix.shared.types.RefreshTokenData;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -108,6 +110,33 @@ public class AuthenticationService {
     }
 
     @Transactional
+    public ApiResponse<RefreshTokenData> refresh(String refreshToken) {
+
+        RefreshToken optionalRefreshToken = refreshTokenRepository.findByToken(refreshToken);
+
+        if (refreshToken == null) {
+            return new ApiResponse<>(false, "INVALID_REFRESH_TOKEN", null);
+        }
+
+        UUID userUuid = optionalRefreshToken.getUserUuid();
+        Optional<UserCredential> user = userCredentialRepository.findByUserUuid(userUuid);
+
+        if (user.isEmpty()) {
+            return new ApiResponse<>(false, "USER_NOT_EXISTS", null);
+        }
+
+        String accessToken = jwtGenerator.generateAccessToken(
+                user.get().getUserUuid().toString(),
+                user.get().getEmail()
+        );
+
+        RefreshTokenData data = new RefreshTokenData();
+        data.setAccessToken(accessToken);
+
+        return new ApiResponse<>(true, "REFRESH_SUCCESS", data);
+    }
+
+    @Transactional
     public ApiResponse<Void> logout(UUID userUuid) {
 
         RefreshToken refreshToken = refreshTokenRepository.findByUserUuid(userUuid);
@@ -117,6 +146,6 @@ public class AuthenticationService {
         }
         refreshTokenRepository.deleteByUserUuid(userUuid);
 
-        return new ApiResponse<Void>(true, "LOGOUT_SUCCESS", null);
+        return new ApiResponse<>(true, "LOGOUT_SUCCESS", null);
     }
 }

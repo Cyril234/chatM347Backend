@@ -5,6 +5,7 @@ import ch.chattrix.shared.dto.LoginUserRequest;
 import ch.chattrix.shared.dto.RegisterUserRequest;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.LoginData;
+import ch.chattrix.shared.types.RefreshTokenData;
 import ch.chattrix.shared.utils.JwtValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,6 +49,33 @@ public class AuthenticationController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return new ApiResponse<>(true, serviceResponse.getMessage(), null);
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<Void> refresh(HttpServletRequest request, HttpServletResponse response) {
+        String token = null;
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (token == null) {
+            return new ApiResponse<>(false, "INVALID_REFRESH_TOKEN", null);
+        }
+
+        ApiResponse<RefreshTokenData> serviceResponse = authenticationService.refresh(token);
+
+        if (!serviceResponse.isSuccess()) {
+            return new ApiResponse<>(false, serviceResponse.getMessage(), null);
+        }
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", serviceResponse.getData().getAccessToken()).httpOnly(true).secure(false).path("/").sameSite("Lax").maxAge(Duration.ofMinutes(60)).build();
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
         return new ApiResponse<>(true, serviceResponse.getMessage(), null);
     }

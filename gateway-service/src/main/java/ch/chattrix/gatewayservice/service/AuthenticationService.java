@@ -2,16 +2,15 @@ package ch.chattrix.gatewayservice.service;
 
 import ch.chattrix.gatewayservice.aggregator.LoginAggregator;
 import ch.chattrix.gatewayservice.aggregator.LogoutAggregator;
+import ch.chattrix.gatewayservice.aggregator.RefreshTokenAggregator;
 import ch.chattrix.gatewayservice.aggregator.RegistrationAggregator;
 import ch.chattrix.gatewayservice.rabbitmq.RabbitCommandPublisher;
-import ch.chattrix.shared.command.UserCredentialRegisterCommand;
-import ch.chattrix.shared.command.UserLoginCommand;
-import ch.chattrix.shared.command.UserLogoutCommand;
-import ch.chattrix.shared.command.UserRegisterCommand;
+import ch.chattrix.shared.command.*;
 import ch.chattrix.shared.dto.LoginUserRequest;
 import ch.chattrix.shared.dto.RegisterUserRequest;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.LoginData;
+import ch.chattrix.shared.types.RefreshTokenData;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -25,17 +24,20 @@ public class AuthenticationService {
     private final RegistrationAggregator registrationAggregator;
     private final LoginAggregator loginAggregator;
     private final LogoutAggregator logoutAggregator;
+    private final RefreshTokenAggregator refreshTokenAggregator;
 
     public AuthenticationService(
             RabbitCommandPublisher publisher,
             RegistrationAggregator registrationAggregator,
             LoginAggregator loginAggregator,
-            LogoutAggregator logoutAggregator
+            LogoutAggregator logoutAggregator,
+            RefreshTokenAggregator refreshTokenAggregator
     ) {
         this.publisher = publisher;
         this.registrationAggregator = registrationAggregator;
         this.loginAggregator = loginAggregator;
         this.logoutAggregator = logoutAggregator;
+        this.refreshTokenAggregator = refreshTokenAggregator;
     }
 
     public ApiResponse<Void> register(RegisterUserRequest request) {
@@ -94,6 +96,29 @@ public class AuthenticationService {
             return future.get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             ApiResponse<LoginData> response = new ApiResponse<>();
+            response.setSuccess(false);
+            response.setMessage("TIMEOUT_OR_ERROR");
+            response.setData(null);
+            return response;
+        }
+    }
+
+    public ApiResponse<RefreshTokenData> refresh(String refreshToken) {
+
+        String correlationId = UUID.randomUUID().toString();
+
+        var future = refreshTokenAggregator.createAccessToken(correlationId);
+
+        publisher.sendRefreshRequest(
+                new UserRefreshTokenCommand(
+                        refreshToken
+                ),
+                correlationId
+        );
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            ApiResponse<RefreshTokenData> response = new ApiResponse<>();
             response.setSuccess(false);
             response.setMessage("TIMEOUT_OR_ERROR");
             response.setData(null);

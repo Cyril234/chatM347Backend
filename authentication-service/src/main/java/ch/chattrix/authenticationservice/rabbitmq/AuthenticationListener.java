@@ -4,13 +4,16 @@ import ch.chattrix.authenticationservice.service.AuthenticationService;
 import ch.chattrix.shared.command.UserCredentialRegisterCommand;
 import ch.chattrix.shared.command.UserLoginCommand;
 import ch.chattrix.shared.command.UserLogoutCommand;
+import ch.chattrix.shared.command.UserRefreshTokenCommand;
 import ch.chattrix.shared.event.BasicRabbitMqResultEvent;
 import ch.chattrix.shared.event.LoginResultEvent;
+import ch.chattrix.shared.event.RefreshTokenResultEvent;
 import ch.chattrix.shared.rabbitmq.Exchanges;
 import ch.chattrix.shared.rabbitmq.Queues;
 import ch.chattrix.shared.rabbitmq.RoutingKeys;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.LoginData;
+import ch.chattrix.shared.types.RefreshTokenData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -51,7 +54,11 @@ public class AuthenticationListener {
 
             BasicRabbitMqResultEvent result = new BasicRabbitMqResultEvent();
             result.setSuccess(serviceResponse.isSuccess());
-            result.setErrorMessage(serviceResponse.isSuccess() ? null : serviceResponse.getMessage());
+            result.setErrorMessage(
+                    serviceResponse.isSuccess()
+                            ? null
+                            : serviceResponse.getMessage()
+            );
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
@@ -67,7 +74,11 @@ public class AuthenticationListener {
 
             BasicRabbitMqResultEvent result = new BasicRabbitMqResultEvent();
             result.setSuccess(false);
-            result.setErrorMessage(e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR");
+            result.setErrorMessage(
+                    e.getMessage() != null
+                            ? e.getMessage()
+                            : "UNKNOWN_ERROR"
+            );
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
@@ -85,6 +96,7 @@ public class AuthenticationListener {
     public void handleLogin(Message message) {
 
         String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
 
         try {
             UserLoginCommand command =
@@ -100,8 +112,11 @@ public class AuthenticationListener {
                             ? null
                             : serviceResponse.getMessage()
             );
-            result.setAccessToken(serviceResponse.getData().getAccessToken());
-            result.setRefreshToken(serviceResponse.getData().getRefreshToken());
+
+            if (serviceResponse.isSuccess() && serviceResponse.getData() != null) {
+                result.setAccessToken(serviceResponse.getData().getAccessToken());
+                result.setRefreshToken(serviceResponse.getData().getRefreshToken());
+            }
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
@@ -131,10 +146,64 @@ public class AuthenticationListener {
         }
     }
 
+    @RabbitListener(queues = Queues.AUTH_REFRESH_QUEUE)
+    public void handleRefresh(Message message) {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        try {
+            UserRefreshTokenCommand command =
+                    objectMapper.readValue(message.getBody(), UserRefreshTokenCommand.class);
+
+            ApiResponse<RefreshTokenData> serviceResponse =
+                    authService.refresh(command.getRefreshToken());
+
+            RefreshTokenResultEvent result = new RefreshTokenResultEvent();
+            result.setSuccess(serviceResponse.isSuccess());
+            result.setErrorMessage(
+                    serviceResponse.isSuccess()
+                            ? null
+                            : serviceResponse.getMessage()
+            );
+
+            if (serviceResponse.isSuccess() && serviceResponse.getData() != null) {
+                result.setAccessToken(serviceResponse.getData().getAccessToken());
+            }
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.USER_RESPONSE,
+                    RoutingKeys.AUTH_RESULT_REFRESH,
+                    result,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+
+        } catch (Exception e) {
+
+            RefreshTokenResultEvent result = new RefreshTokenResultEvent();
+            result.setSuccess(false);
+            result.setErrorMessage(e.getMessage());
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.USER_RESPONSE,
+                    RoutingKeys.AUTH_RESULT_REFRESH,
+                    result,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+        }
+    }
+
     @RabbitListener(queues = Queues.AUTH_LOGOUT_QUEUE)
     public void handleLogout(Message message) {
 
         String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
 
         try {
             UserLogoutCommand command =
