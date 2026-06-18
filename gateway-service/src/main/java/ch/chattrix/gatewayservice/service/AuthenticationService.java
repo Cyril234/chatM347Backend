@@ -56,7 +56,7 @@ public class AuthenticationService {
                 correlationId
         );
 
-        publisher.sendCreateUserRequest(
+        publisher.sendRegisterUserRequest(
                 new UserRegisterCommand(
                         request.getUsername(),
                         userUuid

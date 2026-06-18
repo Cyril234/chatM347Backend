@@ -26,27 +26,27 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue userProfileQueue() {
+    public Queue userRegisterQueue() {
         return new Queue(Queues.USER_REGISTER_QUEUE, true);
     }
 
     @Bean
-    public Queue userResultQueue() {
+    public Queue userRegisterResultQueue() {
         return new Queue(Queues.USER_REGISTER_RESULT_QUEUE, true);
     }
 
     @Bean
-    public Binding userProfileBinding() {
+    public Binding userRegisterBinding() {
         return BindingBuilder
-                .bind(userProfileQueue())
+                .bind(userRegisterQueue())
                 .to(userExchange())
                 .with(RoutingKeys.USER_REGISTER);
     }
 
     @Bean
-    public Binding userResultBinding() {
+    public Binding userRegisterResultBinding() {
         return BindingBuilder
-                .bind(userResultQueue())
+                .bind(userRegisterResultQueue())
                 .to(userResponseExchange())
                 .with(RoutingKeys.USER_RESULT_REGISTER);
     }

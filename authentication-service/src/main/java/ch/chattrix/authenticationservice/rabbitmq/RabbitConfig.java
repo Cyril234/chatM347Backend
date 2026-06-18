@@ -14,13 +14,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
     @Bean
-    public DirectExchange userExchange() {
-        return new DirectExchange(Exchanges.USER);
+    public DirectExchange authenticationExchange() {
+        return new DirectExchange(Exchanges.AUTHENTICATION);
     }
 
     @Bean
-    public DirectExchange userResponseExchange() {
-        return new DirectExchange(Exchanges.USER_RESPONSE);
+    public DirectExchange authenticationResponseExchange() {
+        return new DirectExchange(Exchanges.AUTHENTICATION_RESPONSE);
     }
 
     @Bean
@@ -47,7 +47,7 @@ public class RabbitConfig {
     public Binding authRegisterBinding() {
         return BindingBuilder
                 .bind(authRegisterQueue())
-                .to(userExchange())
+                .to(authenticationExchange())
                 .with(RoutingKeys.AUTH_REGISTER);
     }
 
@@ -55,7 +55,7 @@ public class RabbitConfig {
     public Binding authLoginBinding() {
         return BindingBuilder
                 .bind(authLoginQueue())
-                .to(userExchange())
+                .to(authenticationExchange())
                 .with(RoutingKeys.AUTH_LOGIN);
     }
 
@@ -63,7 +63,7 @@ public class RabbitConfig {
     public Binding authRefreshTokenBinding() {
         return BindingBuilder
                 .bind(authRefreshTokenQueue())
-                .to(userExchange())
+                .to(authenticationExchange())
                 .with(RoutingKeys.AUTH_REFRESH);
     }
 
@@ -71,7 +71,7 @@ public class RabbitConfig {
     public Binding authLogoutBinding() {
         return BindingBuilder
                 .bind(authLogoutQueue())
-                .to(userExchange())
+                .to(authenticationExchange())
                 .with(RoutingKeys.AUTH_LOGOUT);
     }
 

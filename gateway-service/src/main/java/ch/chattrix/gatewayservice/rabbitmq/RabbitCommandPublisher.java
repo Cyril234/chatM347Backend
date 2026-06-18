@@ -40,23 +40,23 @@ public class RabbitCommandPublisher {
     }
 
     public void sendRegisterRequest(UserCredentialRegisterCommand cmd, String correlationId) {
-        sendToUserExchange(cmd, RoutingKeys.AUTH_REGISTER, correlationId);
+        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_REGISTER, correlationId);
     }
 
-    public void sendCreateUserRequest(UserRegisterCommand cmd, String correlationId) {
+    public void sendRegisterUserRequest(UserRegisterCommand cmd, String correlationId) {
         sendToUserExchange(cmd, RoutingKeys.USER_REGISTER, correlationId);
     }
 
     public void sendLoginRequest(UserLoginCommand cmd, String correlationId) {
-        sendToUserExchange(cmd, RoutingKeys.AUTH_LOGIN, correlationId);
+        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_LOGIN, correlationId);
     }
 
     public void sendRefreshRequest(UserRefreshTokenCommand cmd, String correlationId) {
-        sendToUserExchange(cmd, RoutingKeys.AUTH_REFRESH, correlationId);
+        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_REFRESH, correlationId);
     }
 
     public void sendLogoutRequest(UserLogoutCommand cmd, String correlationId) {
-        sendToUserExchange(cmd, RoutingKeys.AUTH_LOGOUT, correlationId);
+        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_LOGOUT, correlationId);
     }
 
 }

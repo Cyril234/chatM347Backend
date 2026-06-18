@@ -61,7 +61,7 @@ public class AuthenticationListener {
             );
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_REGISTER,
                     result,
                     msg -> {
@@ -81,7 +81,7 @@ public class AuthenticationListener {
             );
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_REGISTER,
                     result,
                     msg -> {
@@ -119,7 +119,7 @@ public class AuthenticationListener {
             }
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_LOGIN,
                     result,
                     msg -> {
@@ -135,7 +135,7 @@ public class AuthenticationListener {
             result.setErrorMessage(e.getMessage());
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_LOGIN,
                     result,
                     msg -> {
@@ -172,7 +172,7 @@ public class AuthenticationListener {
             }
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_REFRESH,
                     result,
                     msg -> {
@@ -188,7 +188,7 @@ public class AuthenticationListener {
             result.setErrorMessage(e.getMessage());
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_REFRESH,
                     result,
                     msg -> {
@@ -221,7 +221,7 @@ public class AuthenticationListener {
             );
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_LOGOUT,
                     result,
                     msg -> {
@@ -237,7 +237,7 @@ public class AuthenticationListener {
             result.setErrorMessage(e.getMessage());
 
             rabbitTemplate.convertAndSend(
-                    Exchanges.USER_RESPONSE,
+                    Exchanges.AUTHENTICATION_RESPONSE,
                     RoutingKeys.AUTH_RESULT_LOGOUT,
                     result,
                     msg -> {

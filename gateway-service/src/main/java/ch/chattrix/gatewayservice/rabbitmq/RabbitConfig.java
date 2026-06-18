@@ -20,6 +20,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public DirectExchange authenticationResponseExchange() {
+        return new DirectExchange(Exchanges.AUTHENTICATION_RESPONSE);
+    }
+
+    @Bean
     public Queue authResultQueue() {
         return new Queue(Queues.AUTH_REGISTER_RESULT_QUEUE, true);
     }
@@ -48,12 +53,12 @@ public class RabbitConfig {
     public Binding authRegisterResultBinding() {
         return BindingBuilder
                 .bind(authResultQueue())
-                .to(userResponseExchange())
+                .to(authenticationResponseExchange())
                 .with(RoutingKeys.AUTH_RESULT_REGISTER);
     }
 
     @Bean
-    public Binding userCreateResultBinding() {
+    public Binding userRegisterResultBinding() {
         return BindingBuilder
                 .bind(userResultQueue())
                 .to(userResponseExchange())
@@ -64,7 +69,7 @@ public class RabbitConfig {
     public Binding authloginResultBinding() {
         return BindingBuilder
                 .bind(userLoginQueue())
-                .to(userResponseExchange())
+                .to(authenticationResponseExchange())
                 .with(RoutingKeys.AUTH_RESULT_LOGIN);
     }
 
@@ -72,7 +77,7 @@ public class RabbitConfig {
     public Binding authRefreshTokenResultBinding() {
         return BindingBuilder
                 .bind(refreshTokenQueue())
-                .to(userResponseExchange())
+                .to(authenticationResponseExchange())
                 .with(RoutingKeys.AUTH_RESULT_REFRESH);
     }
 
@@ -80,7 +85,7 @@ public class RabbitConfig {
     public Binding authlogoutResultBinding() {
         return BindingBuilder
                 .bind(userLogoutQueue())
-                .to(userResponseExchange())
+                .to(authenticationResponseExchange())
                 .with(RoutingKeys.AUTH_RESULT_LOGOUT);
     }
 
