@@ -148,4 +148,25 @@ public class AuthenticationService {
 
         return new ApiResponse<>(true, "LOGOUT_SUCCESS", null);
     }
+
+    public ApiResponse<String> getEmailByUserUuid(UUID userUuid) {
+
+        try {
+            Optional<UserCredential> user =
+                    userCredentialRepository.findByUserUuid(userUuid);
+
+            return user.map(userCredential -> new ApiResponse<>(
+                    true,
+                    "EMAIL_LOOKUP_SUCCESS",
+                    userCredential.getEmail()
+            )).orElseGet(() -> new ApiResponse<>(false, "USER_NOT_FOUND", null));
+
+        } catch (Exception e) {
+            return new ApiResponse<>(
+                    false,
+                    "EMAIL_LOOKUP_FAILED",
+                    null
+            );
+        }
+    }
 }

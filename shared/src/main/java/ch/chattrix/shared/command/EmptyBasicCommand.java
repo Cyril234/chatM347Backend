@@ -1,4 +1,4 @@
 package ch.chattrix.shared.command;
 
-public class BasicCommand {
+public class EmptyBasicCommand {
 }

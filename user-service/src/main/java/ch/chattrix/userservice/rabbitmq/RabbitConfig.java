@@ -6,11 +6,9 @@ import ch.chattrix.shared.rabbitmq.RoutingKeys;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,18 +31,28 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue userRegisterResultQueue() {
-        return new Queue(Queues.USER_REGISTER_RESULT_QUEUE, true);
-    }
-
-    @Bean
     public Queue getAllUsersQueue() {
         return new Queue(Queues.USER_GET_ALL_QUEUE, true);
     }
 
     @Bean
+    public Queue getOneUserBaseQueue() {
+        return new Queue(Queues.USER_GET_BASE_DATA_QUEUE, true);
+    }
+
+    @Bean
+    public Queue userRegisterResultQueue() {
+        return new Queue(Queues.USER_REGISTER_RESULT_QUEUE, true);
+    }
+
+    @Bean
     public Queue getAllUsersResultQueue() {
         return new Queue(Queues.USER_GET_ALL_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue getOneUserBaseResultQueue() {
+        return new Queue(Queues.USER_GET_BASE_DATA_RESULT_QUEUE, true);
     }
 
     @Bean
@@ -56,19 +64,27 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Binding userRegisterResultBinding() {
-        return BindingBuilder
-                .bind(userRegisterResultQueue())
-                .to(userResponseExchange())
-                .with(RoutingKeys.USER_RESULT_REGISTER);
-    }
-
-    @Bean
     public Binding getAllUsersBinding() {
         return BindingBuilder
                 .bind(getAllUsersQueue())
                 .to(userExchange())
                 .with(RoutingKeys.USER_GET_ALL);
+    }
+
+    @Bean
+    public Binding getOneUserBaseBinding() {
+        return BindingBuilder
+                .bind(getOneUserBaseQueue())
+                .to(userExchange())
+                .with(RoutingKeys.USER_GET_BASE_DATA);
+    }
+
+    @Bean
+    public Binding userRegisterResultBinding() {
+        return BindingBuilder
+                .bind(userRegisterResultQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_REGISTER);
     }
 
     @Bean
@@ -80,24 +96,11 @@ public class RabbitConfig {
     }
 
     @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
-            ConnectionFactory connectionFactory) {
-
-        SimpleRabbitListenerContainerFactory factory =
-                new SimpleRabbitListenerContainerFactory();
-
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(messageConverter());
-
-        return factory;
-    }
-
-    @Bean
-    public Jackson2JsonMessageConverter messageConverter() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-
-        return new Jackson2JsonMessageConverter(mapper);
+    public Binding getOneUserBaseResultBinding() {
+        return BindingBuilder
+                .bind(getOneUserBaseResultQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_GET_BASE_DATA);
     }
 
     @Bean
@@ -109,5 +112,11 @@ public class RabbitConfig {
         return template;
     }
 
+    @Bean
+    public Jackson2JsonMessageConverter messageConverter() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
+        return new Jackson2JsonMessageConverter(mapper);
+    }
 }

@@ -1,19 +1,21 @@
 package ch.chattrix.shared.event;
 
-import ch.chattrix.shared.types.UserAnonymData;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Date;
+import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetAllUsersResultEvent {
+public class GetOneUserBasicDataResultEvent {
     private boolean success;
     private String errorMessage;
-    private List<UserAnonymData> users;
+    private UUID userUuid;
+    private String username;
+    private Date createdAt;
 }

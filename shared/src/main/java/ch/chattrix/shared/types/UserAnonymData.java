@@ -1,4 +1,4 @@
-package ch.chattrix.shared.command;
+package ch.chattrix.shared.types;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,10 +7,11 @@ import lombok.Setter;
 
 import java.util.UUID;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLogoutCommand {
+@Getter
+@Setter
+public class UserAnonymData {
+    private String username;
     private UUID userUuid;
 }

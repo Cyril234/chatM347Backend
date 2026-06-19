@@ -1,16 +1,15 @@
 package ch.chattrix.gatewayservice.controller;
 
-import ch.chattrix.gatewayservice.service.AuthenticationService;
 import ch.chattrix.gatewayservice.service.UserService;
 import ch.chattrix.shared.response.ApiResponse;
+import ch.chattrix.shared.types.UserAnonymData;
 import ch.chattrix.shared.types.UserData;
 import ch.chattrix.shared.utils.JwtValidator;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -24,21 +23,25 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<List<UserData>> getAllUsers(HttpServletRequest request) {
-        String token = null;
-        if (request.getCookies() != null) {
-            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
-                if ("accessToken".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
-                }
-            }
-        }
+    public ApiResponse<List<UserAnonymData>> getAllUsers(HttpServletRequest request, @CookieValue(value = "accessToken", required = false) String token) {
 
         if (token == null | !jwtValidator.isTokenValid(token)) {
             return new ApiResponse<>(false, "INVALID_ACCESS_TOKEN", null);
         }
 
         return userService.getAllUsers();
+    }
+
+    @GetMapping("/one")
+    public ApiResponse<UserData> getOneUser(
+            @CookieValue(value = "accessToken", required = false) String token) {
+
+        if (token == null || !jwtValidator.isTokenValid(token)) {
+            return new ApiResponse<>(false, "INVALID_ACCESS_TOKEN", null);
+        }
+
+        UUID userUuid = UUID.fromString(jwtValidator.extractSubject(token));
+
+        return userService.getOneUser(userUuid);
     }
 }

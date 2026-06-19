@@ -7,7 +7,6 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,6 +43,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue authGetEmailQueue() {
+        return new Queue(Queues.AUTH_GET_EMAIL_QUEUE, true);
+    }
+
+    @Bean
     public Binding authRegisterBinding() {
         return BindingBuilder
                 .bind(authRegisterQueue())
@@ -76,7 +80,15 @@ public class RabbitConfig {
     }
 
     @Bean
-    public MessageConverter messageConverter() {
+    public Binding authGetEmailBinding() {
+        return BindingBuilder
+                .bind(authGetEmailQueue())
+                .to(authenticationExchange())
+                .with(RoutingKeys.AUTH_GET_EMAIL);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 

@@ -9,7 +9,6 @@ import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,81 +26,107 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue authResultQueue() {
-        return new Queue(Queues.AUTH_REGISTER_RESULT_QUEUE, true);
-    }
-
-    @Bean
-    public Queue userResultQueue() {
+    public Queue userRegisterResultQueue() {
         return new Queue(Queues.USER_REGISTER_RESULT_QUEUE, true);
     }
 
     @Bean
-    public Queue userLoginQueue() {
-        return new Queue(Queues.AUTH_LOGIN_RESULT_QUEUE, true);
-    }
-
-    @Bean
-    public Queue refreshTokenQueue() {
-        return new Queue(Queues.AUTH_REFRESH_RESULT_QUEUE, true);
-    }
-
-    @Bean
-    public Queue userLogoutQueue() {
-        return new Queue(Queues.AUTH_LOGOUT_RESULT_QUEUE, true);
-    }
-
-    @Bean
-    public Queue getAllUsersQueue() {
+    public Queue userGetAllResultQueue() {
         return new Queue(Queues.USER_GET_ALL_RESULT_QUEUE, true);
     }
 
     @Bean
-    public Binding authRegisterResultBinding() {
-        return BindingBuilder
-                .bind(authResultQueue())
-                .to(authenticationResponseExchange())
-                .with(RoutingKeys.AUTH_RESULT_REGISTER);
+    public Queue userGetBaseDataResultQueue() {
+        return new Queue(Queues.USER_GET_BASE_DATA_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authRegisterResultQueue() {
+        return new Queue(Queues.AUTH_REGISTER_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authLoginResultQueue() {
+        return new Queue(Queues.AUTH_LOGIN_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authRefreshResultQueue() {
+        return new Queue(Queues.AUTH_REFRESH_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authLogoutResultQueue() {
+        return new Queue(Queues.AUTH_LOGOUT_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue authGetEmailResultQueue() {
+        return new Queue(Queues.AUTH_GET_EMAIL_RESULT_QUEUE, true);
     }
 
     @Bean
     public Binding userRegisterResultBinding() {
         return BindingBuilder
-                .bind(userResultQueue())
+                .bind(userRegisterResultQueue())
                 .to(userResponseExchange())
                 .with(RoutingKeys.USER_RESULT_REGISTER);
     }
 
     @Bean
-    public Binding authloginResultBinding() {
+    public Binding userGetAllResultBinding() {
         return BindingBuilder
-                .bind(userLoginQueue())
-                .to(authenticationResponseExchange())
-                .with(RoutingKeys.AUTH_RESULT_LOGIN);
-    }
-
-    @Bean
-    public Binding authRefreshTokenResultBinding() {
-        return BindingBuilder
-                .bind(refreshTokenQueue())
-                .to(authenticationResponseExchange())
-                .with(RoutingKeys.AUTH_RESULT_REFRESH);
-    }
-
-    @Bean
-    public Binding getAllUsersResultBinding() {
-        return BindingBuilder
-                .bind(getAllUsersQueue())
+                .bind(userGetAllResultQueue())
                 .to(userResponseExchange())
                 .with(RoutingKeys.USER_RESULT_GET_ALL);
     }
 
     @Bean
-    public Binding authlogoutResultBinding() {
+    public Binding userGetBaseDataResultBinding() {
         return BindingBuilder
-                .bind(userLogoutQueue())
+                .bind(userGetBaseDataResultQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_GET_BASE_DATA);
+    }
+
+    @Bean
+    public Binding authRegisterResultBinding() {
+        return BindingBuilder
+                .bind(authRegisterResultQueue())
+                .to(authenticationResponseExchange())
+                .with(RoutingKeys.AUTH_RESULT_REGISTER);
+    }
+
+    @Bean
+    public Binding authLoginResultBinding() {
+        return BindingBuilder
+                .bind(authLoginResultQueue())
+                .to(authenticationResponseExchange())
+                .with(RoutingKeys.AUTH_RESULT_LOGIN);
+    }
+
+    @Bean
+    public Binding authRefreshResultBinding() {
+        return BindingBuilder
+                .bind(authRefreshResultQueue())
+                .to(authenticationResponseExchange())
+                .with(RoutingKeys.AUTH_RESULT_REFRESH);
+    }
+
+    @Bean
+    public Binding authLogoutResultBinding() {
+        return BindingBuilder
+                .bind(authLogoutResultQueue())
                 .to(authenticationResponseExchange())
                 .with(RoutingKeys.AUTH_RESULT_LOGOUT);
+    }
+
+    @Bean
+    public Binding authGetEmailResultBinding() {
+        return BindingBuilder
+                .bind(authGetEmailResultQueue())
+                .to(authenticationResponseExchange())
+                .with(RoutingKeys.AUTH_RESULT_GET_EMAIL);
     }
 
     @Bean
@@ -117,7 +142,6 @@ public class RabbitConfig {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
 
         template.setMessageConverter(messageConverter());
-
         template.setMandatory(true);
 
         template.setReturnsCallback(returned -> {

@@ -12,9 +12,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserData {
+public class UserBaseData {
     private UUID userUuid;
-    private String username;
-    private String email;
     private Date createdAt;
+    private String username;
 }

@@ -2,7 +2,7 @@ package ch.chattrix.gatewayservice.aggregator;
 
 import ch.chattrix.shared.event.GetAllUsersResultEvent;
 import ch.chattrix.shared.response.ApiResponse;
-import ch.chattrix.shared.types.UserData;
+import ch.chattrix.shared.types.UserAnonymData;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,23 +13,23 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class GetAllUsersAggregator {
 
-    private final Map<String, CompletableFuture<ApiResponse<List<UserData>>>> futures =
+    private final Map<String, CompletableFuture<ApiResponse<List<UserAnonymData>>>> futures =
             new ConcurrentHashMap<>();
 
-    public CompletableFuture<ApiResponse<List<UserData>>> getAllUsers(String correlationId) {
-        CompletableFuture<ApiResponse<List<UserData>>> future = new CompletableFuture<>();
+    public CompletableFuture<ApiResponse<List<UserAnonymData>>> getAllUsers(String correlationId) {
+        CompletableFuture<ApiResponse<List<UserAnonymData>>> future = new CompletableFuture<>();
         futures.put(correlationId, future);
         return future;
     }
 
     public void completeGetAllUsers(String correlationId, GetAllUsersResultEvent event) {
 
-        CompletableFuture<ApiResponse<List<UserData>>> future =
+        CompletableFuture<ApiResponse<List<UserAnonymData>>> future =
                 futures.remove(correlationId);
 
         if (future == null) return;
 
-        ApiResponse<List<UserData>> response = new ApiResponse<>();
+        ApiResponse<List<UserAnonymData>> response = new ApiResponse<>();
 
         response.setSuccess(event.isSuccess());
         response.setMessage(

@@ -133,7 +133,7 @@ public class AuthenticationService {
         var future = logoutAggregator.createLogout(correlationId);
 
         publisher.sendLogoutRequest(
-                new UserLogoutCommand(
+                new UserUuidBasicCommand(
                         userUuid
                 ),
                 correlationId

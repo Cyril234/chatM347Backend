@@ -27,7 +27,7 @@ public class RabbitCommandPublisher {
         );
     }
 
-    private void sendToAuthenticationExchange(Object cmd, String routingKey, String correlationId) {
+    private void sendToAuthExchange(Object cmd, String routingKey, String correlationId) {
         rabbitTemplate.convertAndSend(
                 Exchanges.AUTHENTICATION,
                 routingKey,
@@ -40,26 +40,34 @@ public class RabbitCommandPublisher {
     }
 
     public void sendRegisterRequest(UserCredentialRegisterCommand cmd, String correlationId) {
-        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_REGISTER, correlationId);
+        sendToAuthExchange(cmd, RoutingKeys.AUTH_REGISTER, correlationId);
+    }
+
+    public void sendLoginRequest(UserLoginCommand cmd, String correlationId) {
+        sendToAuthExchange(cmd, RoutingKeys.AUTH_LOGIN, correlationId);
+    }
+
+    public void sendRefreshRequest(UserRefreshTokenCommand cmd, String correlationId) {
+        sendToAuthExchange(cmd, RoutingKeys.AUTH_REFRESH, correlationId);
+    }
+
+    public void sendLogoutRequest(UserUuidBasicCommand cmd, String correlationId) {
+        sendToAuthExchange(cmd, RoutingKeys.AUTH_LOGOUT, correlationId);
     }
 
     public void sendRegisterUserRequest(UserRegisterCommand cmd, String correlationId) {
         sendToUserExchange(cmd, RoutingKeys.USER_REGISTER, correlationId);
     }
 
-    public void sendLoginRequest(UserLoginCommand cmd, String correlationId) {
-        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_LOGIN, correlationId);
-    }
-
-    public void sendRefreshRequest(UserRefreshTokenCommand cmd, String correlationId) {
-        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_REFRESH, correlationId);
-    }
-
-    public void sendLogoutRequest(UserLogoutCommand cmd, String correlationId) {
-        sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_LOGOUT, correlationId);
-    }
-
-    public void sendGetAllUsersRequest(BasicCommand cmd, String correlationId) {
+    public void sendGetAllUsersRequest(EmptyBasicCommand cmd, String correlationId) {
         sendToUserExchange(cmd, RoutingKeys.USER_GET_ALL, correlationId);
+    }
+
+    public void sendGetOneUserBaseRequest(UserUuidBasicCommand cmd, String correlationId) {
+        sendToUserExchange(cmd, RoutingKeys.USER_GET_BASE_DATA, correlationId);
+    }
+
+    public void sendGetOneUserEmailRequest(UserUuidBasicCommand cmd, String correlationId) {
+        sendToAuthExchange(cmd, RoutingKeys.AUTH_GET_EMAIL, correlationId);
     }
 }

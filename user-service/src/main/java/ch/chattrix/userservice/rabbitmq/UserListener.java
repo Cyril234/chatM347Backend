@@ -1,14 +1,16 @@
 package ch.chattrix.userservice.rabbitmq;
 
-import ch.chattrix.shared.command.BasicCommand;
 import ch.chattrix.shared.command.UserRegisterCommand;
+import ch.chattrix.shared.command.UserUuidBasicCommand;
 import ch.chattrix.shared.event.BasicRabbitMqResultEvent;
 import ch.chattrix.shared.event.GetAllUsersResultEvent;
+import ch.chattrix.shared.event.GetOneUserBasicDataResultEvent;
 import ch.chattrix.shared.rabbitmq.Exchanges;
 import ch.chattrix.shared.rabbitmq.Queues;
 import ch.chattrix.shared.rabbitmq.RoutingKeys;
 import ch.chattrix.shared.response.ApiResponse;
-import ch.chattrix.shared.types.UserData;
+import ch.chattrix.shared.types.UserAnonymData;
+import ch.chattrix.shared.types.UserBaseData;
 import ch.chattrix.userservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
@@ -17,6 +19,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class UserListener {
@@ -48,11 +51,7 @@ public class UserListener {
 
             BasicRabbitMqResultEvent event = new BasicRabbitMqResultEvent();
             event.setSuccess(serviceResponse.isSuccess());
-            event.setErrorMessage(
-                    serviceResponse.isSuccess()
-                            ? null
-                            : serviceResponse.getMessage()
-            );
+            event.setErrorMessage(serviceResponse.isSuccess() ? null : serviceResponse.getMessage());
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
@@ -65,12 +64,9 @@ public class UserListener {
             );
 
         } catch (Exception e) {
-
             BasicRabbitMqResultEvent event = new BasicRabbitMqResultEvent();
             event.setSuccess(false);
-            event.setErrorMessage(
-                    e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR"
-            );
+            event.setErrorMessage(e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR");
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
@@ -91,16 +87,12 @@ public class UserListener {
         if (correlationId == null) return;
 
         try {
-            ApiResponse<List<UserData>> serviceResponse =
+            ApiResponse<List<UserAnonymData>> serviceResponse =
                     userService.getAll();
 
             GetAllUsersResultEvent event = new GetAllUsersResultEvent();
             event.setSuccess(serviceResponse.isSuccess());
-            event.setErrorMessage(
-                    serviceResponse.isSuccess()
-                            ? null
-                            : serviceResponse.getMessage()
-            );
+            event.setErrorMessage(serviceResponse.isSuccess() ? null : serviceResponse.getMessage());
             event.setUsers(serviceResponse.getData());
 
             rabbitTemplate.convertAndSend(
@@ -117,14 +109,64 @@ public class UserListener {
 
             GetAllUsersResultEvent event = new GetAllUsersResultEvent();
             event.setSuccess(false);
-            event.setErrorMessage(
-                    e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR"
-            );
-            event.setUsers(null);
+            event.setErrorMessage(e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR");
 
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
                     RoutingKeys.USER_RESULT_GET_ALL,
+                    event,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+        }
+    }
+
+    @RabbitListener(queues = Queues.USER_GET_BASE_DATA_QUEUE)
+    public void handleGetOneUser(Message message) {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        try {
+            UserUuidBasicCommand cmd =
+                    objectMapper.readValue(message.getBody(), UserUuidBasicCommand.class);
+
+            UUID userUuid = cmd.getUserUuid();
+
+            ApiResponse<UserBaseData> serviceResponse =
+                    userService.getOne(userUuid);
+
+            GetOneUserBasicDataResultEvent event = new GetOneUserBasicDataResultEvent();
+            event.setSuccess(serviceResponse.isSuccess());
+            event.setErrorMessage(serviceResponse.isSuccess() ? null : serviceResponse.getMessage());
+
+            if (serviceResponse.getData() != null) {
+                event.setUserUuid(serviceResponse.getData().getUserUuid());
+                event.setUsername(serviceResponse.getData().getUsername());
+                event.setCreatedAt(serviceResponse.getData().getCreatedAt());
+            }
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.USER_RESPONSE,
+                    RoutingKeys.USER_RESULT_GET_BASE_DATA,
+                    event,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+
+        } catch (Exception e) {
+
+            GetOneUserBasicDataResultEvent event = new GetOneUserBasicDataResultEvent();
+            event.setSuccess(false);
+            event.setErrorMessage(e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR");
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.USER_RESPONSE,
+                    RoutingKeys.USER_RESULT_GET_BASE_DATA,
                     event,
                     msg -> {
                         msg.getMessageProperties().setCorrelationId(correlationId);
