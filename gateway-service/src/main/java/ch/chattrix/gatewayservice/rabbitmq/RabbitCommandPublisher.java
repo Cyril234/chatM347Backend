@@ -59,4 +59,7 @@ public class RabbitCommandPublisher {
         sendToAuthenticationExchange(cmd, RoutingKeys.AUTH_LOGOUT, correlationId);
     }
 
+    public void sendGetAllUsersRequest(BasicCommand cmd, String correlationId) {
+        sendToUserExchange(cmd, RoutingKeys.USER_GET_ALL, correlationId);
+    }
 }

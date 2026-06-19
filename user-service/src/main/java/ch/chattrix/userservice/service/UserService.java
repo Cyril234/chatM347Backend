@@ -1,11 +1,13 @@
 package ch.chattrix.userservice.service;
 
 import ch.chattrix.shared.response.ApiResponse;
+import ch.chattrix.shared.types.UserData;
 import ch.chattrix.userservice.entity.User;
 import ch.chattrix.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,6 +42,20 @@ public class UserService {
 
         } catch (Exception e) {
             return new ApiResponse<>(false, "USER_CREATION_FAILED", null);
+        }
+    }
+
+    public ApiResponse<List<UserData>> getAll() {
+        try {
+            List<User> users = userRepository.findAll();
+            List<UserData> userData = new java.util.ArrayList<>(List.of());
+            for (User user : users) {
+                userData.add(new UserData(user.getUsername(), user.getUserUuid()));
+            }
+            return new ApiResponse<>(true, "USER_GET_ALL_SUCCESSFULLY", userData);
+
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "USER_GET_ALL_FAILED", null);
         }
     }
 }

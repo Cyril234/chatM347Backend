@@ -3,6 +3,8 @@ package ch.chattrix.gatewayservice.rabbitmq;
 import ch.chattrix.shared.rabbitmq.Exchanges;
 import ch.chattrix.shared.rabbitmq.Queues;
 import ch.chattrix.shared.rabbitmq.RoutingKeys;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -50,6 +52,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue getAllUsersQueue() {
+        return new Queue(Queues.USER_GET_ALL_RESULT_QUEUE, true);
+    }
+
+    @Bean
     public Binding authRegisterResultBinding() {
         return BindingBuilder
                 .bind(authResultQueue())
@@ -82,6 +89,14 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Binding getAllUsersResultBinding() {
+        return BindingBuilder
+                .bind(getAllUsersQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_GET_ALL);
+    }
+
+    @Bean
     public Binding authlogoutResultBinding() {
         return BindingBuilder
                 .bind(userLogoutQueue())
@@ -90,8 +105,11 @@ public class RabbitConfig {
     }
 
     @Bean
-    public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public Jackson2JsonMessageConverter messageConverter() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
+        return new Jackson2JsonMessageConverter(mapper);
     }
 
     @Bean

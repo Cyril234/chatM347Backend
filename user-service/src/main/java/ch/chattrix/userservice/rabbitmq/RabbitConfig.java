@@ -3,6 +3,8 @@ package ch.chattrix.userservice.rabbitmq;
 import ch.chattrix.shared.rabbitmq.Queues;
 import ch.chattrix.shared.rabbitmq.Exchanges;
 import ch.chattrix.shared.rabbitmq.RoutingKeys;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -36,6 +38,16 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue getAllUsersQueue() {
+        return new Queue(Queues.USER_GET_ALL_QUEUE, true);
+    }
+
+    @Bean
+    public Queue getAllUsersResultQueue() {
+        return new Queue(Queues.USER_GET_ALL_RESULT_QUEUE, true);
+    }
+
+    @Bean
     public Binding userRegisterBinding() {
         return BindingBuilder
                 .bind(userRegisterQueue())
@@ -52,6 +64,22 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Binding getAllUsersBinding() {
+        return BindingBuilder
+                .bind(getAllUsersQueue())
+                .to(userExchange())
+                .with(RoutingKeys.USER_GET_ALL);
+    }
+
+    @Bean
+    public Binding getAllUsersResultBinding() {
+        return BindingBuilder
+                .bind(getAllUsersResultQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_GET_ALL);
+    }
+
+    @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory) {
 
@@ -65,8 +93,11 @@ public class RabbitConfig {
     }
 
     @Bean
-    public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public Jackson2JsonMessageConverter messageConverter() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+
+        return new Jackson2JsonMessageConverter(mapper);
     }
 
     @Bean

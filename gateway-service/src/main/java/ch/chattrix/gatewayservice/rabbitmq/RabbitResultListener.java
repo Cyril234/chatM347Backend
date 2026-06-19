@@ -1,10 +1,8 @@
 package ch.chattrix.gatewayservice.rabbitmq;
 
-import ch.chattrix.gatewayservice.aggregator.LoginAggregator;
-import ch.chattrix.gatewayservice.aggregator.LogoutAggregator;
-import ch.chattrix.gatewayservice.aggregator.RefreshTokenAggregator;
-import ch.chattrix.gatewayservice.aggregator.RegistrationAggregator;
+import ch.chattrix.gatewayservice.aggregator.*;
 import ch.chattrix.shared.event.BasicRabbitMqResultEvent;
+import ch.chattrix.shared.event.GetAllUsersResultEvent;
 import ch.chattrix.shared.event.LoginResultEvent;
 import ch.chattrix.shared.event.RefreshTokenResultEvent;
 import ch.chattrix.shared.rabbitmq.Queues;
@@ -21,18 +19,21 @@ public class RabbitResultListener {
     private final ObjectMapper objectMapper;
     private final LogoutAggregator logoutAggregator;
     private final RefreshTokenAggregator refreshTokenAggregator;
+    private final GetAllUsersAggregator getAllUsersAggregator;
 
     public RabbitResultListener(
             RegistrationAggregator registrationAggregator,
             LoginAggregator loginAggregator,
             ObjectMapper objectMapper,
             RefreshTokenAggregator refreshTokenAggregator,
-            LogoutAggregator logoutAggregator) {
+            LogoutAggregator logoutAggregator,
+            GetAllUsersAggregator getAllUsersAggregator) {
         this.registrationAggregator = registrationAggregator;
         this.loginAggregator = loginAggregator;
         this.objectMapper = objectMapper;
         this.logoutAggregator = logoutAggregator;
         this.refreshTokenAggregator = refreshTokenAggregator;
+        this.getAllUsersAggregator = getAllUsersAggregator;
     }
 
     @RabbitListener(queues = Queues.AUTH_REGISTER_RESULT_QUEUE)
@@ -108,5 +109,19 @@ public class RabbitResultListener {
                 objectMapper.readValue(message.getBody(), BasicRabbitMqResultEvent.class);
 
         logoutAggregator.completeLogout(correlationId, event);
+    }
+
+    @RabbitListener(queues = Queues.USER_GET_ALL_RESULT_QUEUE)
+    public void handleGetAllUsers(Message message) throws Exception {
+
+        String correlationId =
+                message.getMessageProperties().getCorrelationId();
+
+        if (correlationId == null) return;
+
+        GetAllUsersResultEvent event =
+                objectMapper.readValue(message.getBody(), GetAllUsersResultEvent.class);
+
+        getAllUsersAggregator.completeGetAllUsers(correlationId, event);
     }
 }

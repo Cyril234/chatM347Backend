@@ -7,10 +7,13 @@ public class RoutingKeys {
     public static final String AUTH_LOGOUT = "auth.logout";
     public static final String AUTH_REFRESH = "auth.refresh";
     public static final String USER_REGISTER = "user.register";
+    public static final String USER_GET_ALL = "user.get.all";
 
     public static final String AUTH_RESULT_REGISTER = "auth.result.register";
     public static final String AUTH_RESULT_LOGIN = "auth.result.login";
     public static final String AUTH_RESULT_LOGOUT = "auth.result.logout";
     public static final String AUTH_RESULT_REFRESH = "auth.result.refresh";
     public static final String USER_RESULT_REGISTER = "user.result.register";
+    public static final String USER_RESULT_GET_ALL = "user.result.get.all";
+
 }
