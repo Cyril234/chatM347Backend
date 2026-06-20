@@ -1,11 +1,13 @@
 package ch.chattrix.gatewayservice.service;
 
 import ch.chattrix.gatewayservice.aggregator.EditCredentialAggregator;
+import ch.chattrix.gatewayservice.aggregator.EditUsernameAggregator;
 import ch.chattrix.gatewayservice.aggregator.GetAllUsersAggregator;
 import ch.chattrix.gatewayservice.aggregator.GetOneUserAggregator;
 import ch.chattrix.gatewayservice.rabbitmq.RabbitCommandPublisher;
 import ch.chattrix.shared.command.EmptyBasicCommand;
 import ch.chattrix.shared.command.UserEditCredentialCommand;
+import ch.chattrix.shared.command.UserEditUsernameCommand;
 import ch.chattrix.shared.command.UserUuidBasicCommand;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.UserAnonymData;
@@ -24,16 +26,18 @@ public class UserService {
     private final GetAllUsersAggregator getAllUsersAggregator;
     private final GetOneUserAggregator getOneUserAggregator;
     private final EditCredentialAggregator editCredentialAggregator;
+    private final EditUsernameAggregator editUsernameAggregator;
 
     public UserService(
             RabbitCommandPublisher publisher,
             GetAllUsersAggregator getAllUsersAggregator,
             GetOneUserAggregator getOneUserAggregator,
-            EditCredentialAggregator editCredentialAggregator) {
+            EditCredentialAggregator editCredentialAggregator, EditUsernameAggregator editUsernameAggregator) {
         this.publisher = publisher;
         this.getAllUsersAggregator = getAllUsersAggregator;
         this.getOneUserAggregator = getOneUserAggregator;
         this.editCredentialAggregator = editCredentialAggregator;
+        this.editUsernameAggregator = editUsernameAggregator;
     }
 
     public ApiResponse<List<UserAnonymData>> getAllUsers() {
@@ -102,6 +106,32 @@ public class UserService {
 
         publisher.sendEditCredentialRequest(
                 new UserEditCredentialCommand(userUuid, email, password),
+                correlationId
+        );
+
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+
+            future.cancel(true);
+
+            ApiResponse<Void> response = new ApiResponse<>();
+            response.setSuccess(false);
+            response.setMessage("TIMEOUT_OR_ERROR");
+            response.setData(null);
+            return response;
+        }
+    }
+
+    public ApiResponse<Void> editUsername(String username, UUID userUuid) {
+
+        String correlationId = UUID.randomUUID().toString();
+
+        CompletableFuture<ApiResponse<Void>> future =
+                editUsernameAggregator.editUsername(correlationId);
+
+        publisher.sendEditUsernameRequest(
+                new UserEditUsernameCommand(userUuid, username),
                 correlationId
         );
 

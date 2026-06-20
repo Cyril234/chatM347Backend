@@ -74,4 +74,8 @@ public class RabbitCommandPublisher {
     public void sendEditCredentialRequest(UserEditCredentialCommand cmd, String correlationId) {
         sendToAuthExchange(cmd, RoutingKeys.AUTH_EDIT_CREDENTIAL, correlationId);
     }
+
+    public void sendEditUsernameRequest(UserEditUsernameCommand cmd, String correlationId) {
+        sendToUserExchange(cmd, RoutingKeys.USER_EDIT_USERNAME, correlationId);
+    }
 }

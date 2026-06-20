@@ -6,7 +6,9 @@ import ch.chattrix.shared.types.UserBaseData;
 import ch.chattrix.userservice.entity.User;
 import ch.chattrix.userservice.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -82,5 +84,31 @@ public class UserService {
         } catch (Exception e) {
             return new ApiResponse<>(false, "USER_GET_ONE_FAILED", null);
         }
+    }
+
+    @Transactional
+    public ApiResponse<Void> editUsername(UUID userUuid, String username) {
+
+        User user = userRepository.findByUserUuid(userUuid)
+                .orElse(null);
+
+        if (user == null) {
+            return new ApiResponse<>(false, "USER_NOT_FOUND", null);
+        }
+
+        if (username == null || username.isBlank()) {
+            return new ApiResponse<>(false, "NO_USERNAME_PROVIDED", null);
+        }
+
+        username = username.trim();
+
+        if (userRepository.existsByUsernameAndUserUuidNot(username, userUuid)) {
+            return new ApiResponse<>(false, "USERNAME_ALREADY_EXISTS", null);
+        }
+
+        user.setUsername(username);
+        user.setUpdatedAt(Date.from(Instant.now()));
+
+        return new ApiResponse<>(true, "USER_EDIT_USERNAME_SUCCESS", null);
     }
 }

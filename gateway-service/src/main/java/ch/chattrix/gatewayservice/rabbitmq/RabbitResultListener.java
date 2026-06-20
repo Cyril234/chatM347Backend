@@ -19,6 +19,7 @@ public class RabbitResultListener {
     private final GetAllUsersAggregator getAllUsersAggregator;
     private final GetOneUserAggregator getOneUserAggregator;
     private final EditCredentialAggregator editCredentialAggregator;
+    private final EditUsernameAggregator editUsernameAggregator;
 
     public RabbitResultListener(
             RegistrationAggregator registrationAggregator,
@@ -28,7 +29,7 @@ public class RabbitResultListener {
             LogoutAggregator logoutAggregator,
             GetOneUserAggregator getOneUserAggregator,
             GetAllUsersAggregator getAllUsersAggregator,
-            EditCredentialAggregator editCredentialAggregator) {
+            EditCredentialAggregator editCredentialAggregator, EditUsernameAggregator editUsernameAggregator) {
         this.registrationAggregator = registrationAggregator;
         this.loginAggregator = loginAggregator;
         this.objectMapper = objectMapper;
@@ -37,6 +38,7 @@ public class RabbitResultListener {
         this.getAllUsersAggregator = getAllUsersAggregator;
         this.getOneUserAggregator = getOneUserAggregator;
         this.editCredentialAggregator = editCredentialAggregator;
+        this.editUsernameAggregator = editUsernameAggregator;
     }
 
     @RabbitListener(queues = Queues.AUTH_REGISTER_RESULT_QUEUE)
@@ -149,5 +151,18 @@ public class RabbitResultListener {
                         BasicRabbitMqResultEvent.class);
 
         editCredentialAggregator.completeEditCredential(correlationId, event);
+    }
+
+    @RabbitListener(queues = Queues.USER_EDIT_USERNAME_RESULT_QUEUE)
+    public void handleEditUsername(Message message) throws Exception {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        BasicRabbitMqResultEvent event =
+                objectMapper.readValue(message.getBody(),
+                        BasicRabbitMqResultEvent.class);
+
+        editUsernameAggregator.completeEditUser(correlationId, event);
     }
 }

@@ -9,12 +9,14 @@ public class Queues {
     public static final String AUTH_EDIT_CREDENTIAL_QUEUE = "auth.edit.credential.queue";
     public static final String USER_REGISTER_QUEUE = "user.register.queue";
     public static final String USER_GET_ALL_QUEUE = "user.get.all.queue";
+    public static final String USER_EDIT_USERNAME_QUEUE = "user.edit.username.queue";
     public static final String USER_GET_BASE_DATA_QUEUE = "user.get.base.data.queue";
     public static final String AUTH_REGISTER_RESULT_QUEUE = "auth.register.result.queue";
     public static final String AUTH_LOGIN_RESULT_QUEUE = "auth.login.result.queue";
     public static final String AUTH_LOGOUT_RESULT_QUEUE = "auth.logout.result.queue";
     public static final String AUTH_REFRESH_RESULT_QUEUE = "auth.refresh.result.queue";
     public static final String AUTH_GET_EMAIL_RESULT_QUEUE = "auth.get.email.result.queue";
+    public static final String USER_EDIT_USERNAME_RESULT_QUEUE = "user.edit.username.result.queue";
     public static final String AUTH_EDIT_CREDENTIAL_RESULT_QUEUE = "auth.edit.credential.result.queue";
     public static final String USER_REGISTER_RESULT_QUEUE = "user.register.result.queue";
     public static final String USER_GET_ALL_RESULT_QUEUE = "user.get.all.result.queue";

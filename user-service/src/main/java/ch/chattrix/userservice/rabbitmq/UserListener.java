@@ -1,5 +1,6 @@
 package ch.chattrix.userservice.rabbitmq;
 
+import ch.chattrix.shared.command.UserEditUsernameCommand;
 import ch.chattrix.shared.command.UserRegisterCommand;
 import ch.chattrix.shared.command.UserUuidBasicCommand;
 import ch.chattrix.shared.event.BasicRabbitMqResultEvent;
@@ -167,6 +168,53 @@ public class UserListener {
             rabbitTemplate.convertAndSend(
                     Exchanges.USER_RESPONSE,
                     RoutingKeys.USER_RESULT_GET_BASE_DATA,
+                    event,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+        }
+    }
+
+    @RabbitListener(queues = Queues.USER_EDIT_USERNAME_QUEUE)
+    public void handleEditUsername(Message message) {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        try {
+            UserEditUsernameCommand cmd =
+                    objectMapper.readValue(message.getBody(), UserEditUsernameCommand.class);
+
+            UUID userUuid = cmd.getUserUuid();
+
+            ApiResponse<Void> serviceResponse =
+                    userService.editUsername(userUuid, cmd.getUsername());
+
+            BasicRabbitMqResultEvent event = new BasicRabbitMqResultEvent();
+            event.setSuccess(serviceResponse.isSuccess());
+            event.setErrorMessage(serviceResponse.isSuccess() ? null : serviceResponse.getMessage());
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.USER_RESPONSE,
+                    RoutingKeys.USER_RESULT_EDIT_USERNAME,
+                    event,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+
+        } catch (Exception e) {
+
+            GetOneUserBasicDataResultEvent event = new GetOneUserBasicDataResultEvent();
+            event.setSuccess(false);
+            event.setErrorMessage(e.getMessage() != null ? e.getMessage() : "UNKNOWN_ERROR");
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.USER_RESPONSE,
+                    RoutingKeys.USER_RESULT_EDIT_USERNAME,
                     event,
                     msg -> {
                         msg.getMessageProperties().setCorrelationId(correlationId);

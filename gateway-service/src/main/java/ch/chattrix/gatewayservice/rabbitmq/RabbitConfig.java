@@ -71,6 +71,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue userEditUsernameResultQueue() {
+        return new Queue(Queues.USER_EDIT_USERNAME_RESULT_QUEUE, true);
+    }
+
+    @Bean
     public Binding userRegisterResultBinding() {
         return BindingBuilder
                 .bind(userRegisterResultQueue())
@@ -140,6 +145,14 @@ public class RabbitConfig {
                 .bind(authEditCredentialResultQueue())
                 .to(authenticationResponseExchange())
                 .with(RoutingKeys.AUTH_RESULT_EDIT_CREDENTIAL);
+    }
+
+    @Bean
+    public Binding userEditUsernameResultBinding() {
+        return BindingBuilder
+                .bind(userEditUsernameResultQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_EDIT_USERNAME);
     }
 
     @Bean

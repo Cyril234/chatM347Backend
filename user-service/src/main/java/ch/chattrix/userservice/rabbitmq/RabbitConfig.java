@@ -41,6 +41,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue editUserNameQueue() {
+        return new Queue(Queues.USER_EDIT_USERNAME_QUEUE, true);
+    }
+
+    @Bean
     public Queue userRegisterResultQueue() {
         return new Queue(Queues.USER_REGISTER_RESULT_QUEUE, true);
     }
@@ -53,6 +58,11 @@ public class RabbitConfig {
     @Bean
     public Queue getOneUserBaseResultQueue() {
         return new Queue(Queues.USER_GET_BASE_DATA_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue editUsernameResultQueue() {
+        return new Queue(Queues.USER_EDIT_USERNAME_RESULT_QUEUE, true);
     }
 
     @Bean
@@ -80,6 +90,14 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Binding editUsernameBinding() {
+        return BindingBuilder
+                .bind(editUserNameQueue())
+                .to(userExchange())
+                .with(RoutingKeys.USER_EDIT_USERNAME);
+    }
+
+    @Bean
     public Binding userRegisterResultBinding() {
         return BindingBuilder
                 .bind(userRegisterResultQueue())
@@ -101,6 +119,14 @@ public class RabbitConfig {
                 .bind(getOneUserBaseResultQueue())
                 .to(userResponseExchange())
                 .with(RoutingKeys.USER_RESULT_GET_BASE_DATA);
+    }
+
+    @Bean
+    public Binding editUsernameResultBinding() {
+        return BindingBuilder
+                .bind(editUsernameResultQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_EDIT_USERNAME);
     }
 
     @Bean
