@@ -18,6 +18,7 @@ public class RabbitResultListener {
     private final RefreshTokenAggregator refreshTokenAggregator;
     private final GetAllUsersAggregator getAllUsersAggregator;
     private final GetOneUserAggregator getOneUserAggregator;
+    private final EditCredentialAggregator editCredentialAggregator;
 
     public RabbitResultListener(
             RegistrationAggregator registrationAggregator,
@@ -26,8 +27,8 @@ public class RabbitResultListener {
             RefreshTokenAggregator refreshTokenAggregator,
             LogoutAggregator logoutAggregator,
             GetOneUserAggregator getOneUserAggregator,
-            GetAllUsersAggregator getAllUsersAggregator
-    ) {
+            GetAllUsersAggregator getAllUsersAggregator,
+            EditCredentialAggregator editCredentialAggregator) {
         this.registrationAggregator = registrationAggregator;
         this.loginAggregator = loginAggregator;
         this.objectMapper = objectMapper;
@@ -35,6 +36,7 @@ public class RabbitResultListener {
         this.refreshTokenAggregator = refreshTokenAggregator;
         this.getAllUsersAggregator = getAllUsersAggregator;
         this.getOneUserAggregator = getOneUserAggregator;
+        this.editCredentialAggregator = editCredentialAggregator;
     }
 
     @RabbitListener(queues = Queues.AUTH_REGISTER_RESULT_QUEUE)
@@ -134,5 +136,18 @@ public class RabbitResultListener {
                         GetOneUserEmailDataResultEvent.class);
 
         getOneUserAggregator.handleEmail(correlationId, event);
+    }
+
+    @RabbitListener(queues = Queues.AUTH_EDIT_CREDENTIAL_RESULT_QUEUE)
+    public void handleEditCredential(Message message) throws Exception {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        BasicRabbitMqResultEvent event =
+                objectMapper.readValue(message.getBody(),
+                        BasicRabbitMqResultEvent.class);
+
+        editCredentialAggregator.completeEditCredential(correlationId, event);
     }
 }

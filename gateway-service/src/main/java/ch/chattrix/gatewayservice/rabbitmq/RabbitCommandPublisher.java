@@ -70,4 +70,8 @@ public class RabbitCommandPublisher {
     public void sendGetOneUserEmailRequest(UserUuidBasicCommand cmd, String correlationId) {
         sendToAuthExchange(cmd, RoutingKeys.AUTH_GET_EMAIL, correlationId);
     }
+
+    public void sendEditCredentialRequest(UserEditCredentialCommand cmd, String correlationId) {
+        sendToAuthExchange(cmd, RoutingKeys.AUTH_EDIT_CREDENTIAL, correlationId);
+    }
 }

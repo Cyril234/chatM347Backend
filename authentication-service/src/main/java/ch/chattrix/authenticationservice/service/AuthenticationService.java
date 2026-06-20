@@ -169,4 +169,38 @@ public class AuthenticationService {
             );
         }
     }
+
+    @Transactional
+    public ApiResponse<Void> editCredential(UUID userUuid, String email, String password) {
+
+        UserCredential userCredential = userCredentialRepository.findByUserUuid(userUuid)
+                .orElse(null);
+
+        if (userCredential == null) {
+            return new ApiResponse<>(false, "NO_CREDENTIAL_FOUND", null);
+        }
+
+        if (email == null && password == null) {
+            return new ApiResponse<>(false, "NO_CREDENTIAL_TO_EDIT_FOUND", null);
+        }
+
+        if (email != null &&
+                userCredentialRepository.findByEmail(email)
+                        .filter(u -> !u.getUserUuid().equals(userUuid))
+                        .isPresent()) {
+            return new ApiResponse<>(false, "EMAIL_ALREADY_EXISTS", null);
+        }
+
+        if (email != null && !email.isBlank()) {
+            userCredential.setEmail(email);
+        }
+
+        if (password != null && !password.isBlank()) {
+            userCredential.setPasswordHash(hashPassword(password));
+        }
+
+        userCredential.setUpdatedAt(Date.from(Instant.now()));
+
+        return new ApiResponse<>(true, "EDIT_CREDENTIAL_SUCCESS", null);
+    }
 }

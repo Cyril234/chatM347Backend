@@ -1,6 +1,7 @@
 package ch.chattrix.gatewayservice.controller;
 
 import ch.chattrix.gatewayservice.service.UserService;
+import ch.chattrix.shared.dto.EditCredentialRequest;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.UserAnonymData;
 import ch.chattrix.shared.types.UserData;
@@ -43,5 +44,18 @@ public class UserController {
         UUID userUuid = UUID.fromString(jwtValidator.extractSubject(token));
 
         return userService.getOneUser(userUuid);
+    }
+
+    @PutMapping("/edit/credential")
+    public ApiResponse<Void> editCredential(
+            @CookieValue(value = "accessToken", required = false) String token, @RequestBody EditCredentialRequest request) {
+
+        if (token == null || !jwtValidator.isTokenValid(token)) {
+            return new ApiResponse<>(false, "INVALID_ACCESS_TOKEN", null);
+        }
+
+        UUID userUuid = UUID.fromString(jwtValidator.extractSubject(token));
+
+        return userService.editCredential(request.getEmail(), request.getPassword(), userUuid);
     }
 }

@@ -1,14 +1,18 @@
-package ch.chattrix.shared.types;
+package ch.chattrix.shared.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserEmailData {
+@NoArgsConstructor
+public class UserEditCredentialCommand {
+    private UUID userUuid;
     private String email;
+    private String password;
 }

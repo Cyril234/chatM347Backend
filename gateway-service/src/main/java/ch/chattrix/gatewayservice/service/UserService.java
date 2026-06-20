@@ -1,9 +1,11 @@
 package ch.chattrix.gatewayservice.service;
 
+import ch.chattrix.gatewayservice.aggregator.EditCredentialAggregator;
 import ch.chattrix.gatewayservice.aggregator.GetAllUsersAggregator;
 import ch.chattrix.gatewayservice.aggregator.GetOneUserAggregator;
 import ch.chattrix.gatewayservice.rabbitmq.RabbitCommandPublisher;
 import ch.chattrix.shared.command.EmptyBasicCommand;
+import ch.chattrix.shared.command.UserEditCredentialCommand;
 import ch.chattrix.shared.command.UserUuidBasicCommand;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.UserAnonymData;
@@ -21,15 +23,17 @@ public class UserService {
     private final RabbitCommandPublisher publisher;
     private final GetAllUsersAggregator getAllUsersAggregator;
     private final GetOneUserAggregator getOneUserAggregator;
+    private final EditCredentialAggregator editCredentialAggregator;
 
     public UserService(
             RabbitCommandPublisher publisher,
             GetAllUsersAggregator getAllUsersAggregator,
-            GetOneUserAggregator getOneUserAggregator
-    ) {
+            GetOneUserAggregator getOneUserAggregator,
+            EditCredentialAggregator editCredentialAggregator) {
         this.publisher = publisher;
         this.getAllUsersAggregator = getAllUsersAggregator;
         this.getOneUserAggregator = getOneUserAggregator;
+        this.editCredentialAggregator = editCredentialAggregator;
     }
 
     public ApiResponse<List<UserAnonymData>> getAllUsers() {
@@ -82,6 +86,32 @@ public class UserService {
             future.cancel(true);
 
             ApiResponse<UserData> response = new ApiResponse<>();
+            response.setSuccess(false);
+            response.setMessage("TIMEOUT_OR_ERROR");
+            response.setData(null);
+            return response;
+        }
+    }
+
+    public ApiResponse<Void> editCredential(String email, String password, UUID userUuid) {
+
+        String correlationId = UUID.randomUUID().toString();
+
+        CompletableFuture<ApiResponse<Void>> future =
+                editCredentialAggregator.editCredential(correlationId);
+
+        publisher.sendEditCredentialRequest(
+                new UserEditCredentialCommand(userUuid, email, password),
+                correlationId
+        );
+
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+
+            future.cancel(true);
+
+            ApiResponse<Void> response = new ApiResponse<>();
             response.setSuccess(false);
             response.setMessage("TIMEOUT_OR_ERROR");
             response.setData(null);

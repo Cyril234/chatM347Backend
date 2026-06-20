@@ -48,6 +48,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue authEditCredentialQueue() {
+        return new Queue(Queues.AUTH_EDIT_CREDENTIAL_QUEUE, true);
+    }
+
+    @Bean
     public Binding authRegisterBinding() {
         return BindingBuilder
                 .bind(authRegisterQueue())
@@ -85,6 +90,14 @@ public class RabbitConfig {
                 .bind(authGetEmailQueue())
                 .to(authenticationExchange())
                 .with(RoutingKeys.AUTH_GET_EMAIL);
+    }
+
+    @Bean
+    public Binding authEditCredentialBinding() {
+        return BindingBuilder
+                .bind(authEditCredentialQueue())
+                .to(authenticationExchange())
+                .with(RoutingKeys.AUTH_EDIT_CREDENTIAL);
     }
 
     @Bean
