@@ -1,4 +1,4 @@
-package ch.chattrix.shared.command;
+package ch.chattrix.shared.rabbitmq.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

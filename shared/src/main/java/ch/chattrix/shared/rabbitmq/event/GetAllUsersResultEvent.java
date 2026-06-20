@@ -1,4 +1,4 @@
-package ch.chattrix.shared.event;
+package ch.chattrix.shared.rabbitmq.event;
 
 import ch.chattrix.shared.types.UserAnonymData;
 import lombok.AllArgsConstructor;

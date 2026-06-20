@@ -1,15 +1,16 @@
-package ch.chattrix.shared.event;
+package ch.chattrix.shared.rabbitmq.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BasicRabbitMqResultEvent {
-    private boolean success;
-    private String errorMessage;
+public class UserRefreshTokenCommand {
+    private String refreshToken;
 }

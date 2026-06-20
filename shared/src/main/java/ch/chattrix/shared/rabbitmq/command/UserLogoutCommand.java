@@ -1,4 +1,4 @@
-package ch.chattrix.shared.command;
+package ch.chattrix.shared.rabbitmq.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +11,6 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserCredentialRegisterCommand {
-    private String email;
-    private String password;
+public class UserLogoutCommand {
     private UUID userUuid;
 }

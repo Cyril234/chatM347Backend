@@ -1,4 +1,4 @@
-package ch.chattrix.shared.event;
+package ch.chattrix.shared.rabbitmq.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

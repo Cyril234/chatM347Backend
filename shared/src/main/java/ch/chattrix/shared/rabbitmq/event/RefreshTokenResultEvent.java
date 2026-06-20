@@ -1,4 +1,4 @@
-package ch.chattrix.shared.event;
+package ch.chattrix.shared.rabbitmq.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetOneUserEmailDataResultEvent extends BasicRabbitMqResultEvent {
-    private String email;
+public class RefreshTokenResultEvent extends BasicRabbitMqResultEvent {
+    private String accessToken;
 }
