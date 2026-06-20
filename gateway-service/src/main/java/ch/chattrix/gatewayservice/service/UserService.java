@@ -25,18 +25,16 @@ public class UserService {
     private final RabbitCommandPublisher publisher;
     private final GetAllUsersAggregator getAllUsersAggregator;
     private final GetOneUserAggregator getOneUserAggregator;
-    private final EditCredentialAggregator editCredentialAggregator;
     private final EditUsernameAggregator editUsernameAggregator;
 
     public UserService(
             RabbitCommandPublisher publisher,
             GetAllUsersAggregator getAllUsersAggregator,
             GetOneUserAggregator getOneUserAggregator,
-            EditCredentialAggregator editCredentialAggregator, EditUsernameAggregator editUsernameAggregator) {
+            EditUsernameAggregator editUsernameAggregator) {
         this.publisher = publisher;
         this.getAllUsersAggregator = getAllUsersAggregator;
         this.getOneUserAggregator = getOneUserAggregator;
-        this.editCredentialAggregator = editCredentialAggregator;
         this.editUsernameAggregator = editUsernameAggregator;
     }
 
@@ -90,32 +88,6 @@ public class UserService {
             future.cancel(true);
 
             ApiResponse<UserData> response = new ApiResponse<>();
-            response.setSuccess(false);
-            response.setMessage("TIMEOUT_OR_ERROR");
-            response.setData(null);
-            return response;
-        }
-    }
-
-    public ApiResponse<Void> editCredential(String email, String password, UUID userUuid) {
-
-        String correlationId = UUID.randomUUID().toString();
-
-        CompletableFuture<ApiResponse<Void>> future =
-                editCredentialAggregator.editCredential(correlationId);
-
-        publisher.sendEditCredentialRequest(
-                new UserEditCredentialCommand(userUuid, email, password),
-                correlationId
-        );
-
-        try {
-            return future.get(5, TimeUnit.SECONDS);
-        } catch (Exception e) {
-
-            future.cancel(true);
-
-            ApiResponse<Void> response = new ApiResponse<>();
             response.setSuccess(false);
             response.setMessage("TIMEOUT_OR_ERROR");
             response.setData(null);

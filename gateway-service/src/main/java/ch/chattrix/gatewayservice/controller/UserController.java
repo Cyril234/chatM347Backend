@@ -1,5 +1,6 @@
 package ch.chattrix.gatewayservice.controller;
 
+import ch.chattrix.gatewayservice.service.AuthenticationService;
 import ch.chattrix.gatewayservice.service.UserService;
 import ch.chattrix.shared.dto.EditCredentialRequest;
 import ch.chattrix.shared.dto.EditUsernameRequest;
@@ -18,10 +19,12 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
     private final JwtValidator jwtValidator;
+    private final AuthenticationService authenticationService;
 
-    public UserController(UserService userService, JwtValidator jwtValidator) {
+    public UserController(UserService userService, JwtValidator jwtValidator, AuthenticationService authenticationService) {
         this.userService = userService;
         this.jwtValidator = jwtValidator;
+        this.authenticationService = authenticationService;
     }
 
     @GetMapping("/all")
@@ -58,7 +61,7 @@ public class UserController {
 
         UUID userUuid = UUID.fromString(jwtValidator.extractSubject(token));
 
-        return userService.editCredential(
+        return authenticationService.editCredential(
                 request.getEmail(),
                 request.getPassword(),
                 userUuid
