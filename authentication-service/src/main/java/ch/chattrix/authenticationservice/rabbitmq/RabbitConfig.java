@@ -53,6 +53,11 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue authDeleteQueue() {
+        return new Queue(Queues.AUTH_DELETE_QUEUE, true);
+    }
+
+    @Bean
     public Binding authRegisterBinding() {
         return BindingBuilder
                 .bind(authRegisterQueue())
@@ -98,6 +103,14 @@ public class RabbitConfig {
                 .bind(authEditCredentialQueue())
                 .to(authenticationExchange())
                 .with(RoutingKeys.AUTH_EDIT_CREDENTIAL);
+    }
+
+    @Bean
+    public Binding authDeleteBinding() {
+        return BindingBuilder
+                .bind(authDeleteQueue())
+                .to(authenticationExchange())
+                .with(RoutingKeys.AUTH_DELETE);
     }
 
     @Bean

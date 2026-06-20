@@ -85,12 +85,7 @@ public class AuthenticationController {
             return serviceResponse;
         }
 
-        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "").httpOnly(true).secure(false).path("/").sameSite("Lax").maxAge(0).build();
-
-        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "").httpOnly(true).secure(false).path("/").sameSite("Lax").maxAge(0).build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, deleteAccess.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, deleteRefresh.toString());
+        UserController.deleteCookies(response);
 
         return serviceResponse;
     }

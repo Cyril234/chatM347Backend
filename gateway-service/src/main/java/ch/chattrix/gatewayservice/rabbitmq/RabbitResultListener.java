@@ -20,6 +20,7 @@ public class RabbitResultListener {
     private final GetOneUserAggregator getOneUserAggregator;
     private final EditCredentialAggregator editCredentialAggregator;
     private final EditUsernameAggregator editUsernameAggregator;
+    private final DeleteUserAggregator deleteUserAggregator;
 
     public RabbitResultListener(
             RegistrationAggregator registrationAggregator,
@@ -29,7 +30,7 @@ public class RabbitResultListener {
             LogoutAggregator logoutAggregator,
             GetOneUserAggregator getOneUserAggregator,
             GetAllUsersAggregator getAllUsersAggregator,
-            EditCredentialAggregator editCredentialAggregator, EditUsernameAggregator editUsernameAggregator) {
+            EditCredentialAggregator editCredentialAggregator, EditUsernameAggregator editUsernameAggregator, DeleteUserAggregator deleteUserAggregator) {
         this.registrationAggregator = registrationAggregator;
         this.loginAggregator = loginAggregator;
         this.objectMapper = objectMapper;
@@ -39,6 +40,7 @@ public class RabbitResultListener {
         this.getOneUserAggregator = getOneUserAggregator;
         this.editCredentialAggregator = editCredentialAggregator;
         this.editUsernameAggregator = editUsernameAggregator;
+        this.deleteUserAggregator = deleteUserAggregator;
     }
 
     @RabbitListener(queues = Queues.AUTH_REGISTER_RESULT_QUEUE)
@@ -164,5 +166,29 @@ public class RabbitResultListener {
                         BasicRabbitMqResultEvent.class);
 
         editUsernameAggregator.completeEditUser(correlationId, event);
+    }
+
+    @RabbitListener(queues = Queues.AUTH_DELETE_RESULT_QUEUE)
+    public void handleAuthDelete(Message message) throws Exception {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        BasicRabbitMqResultEvent event =
+                objectMapper.readValue(message.getBody(), BasicRabbitMqResultEvent.class);
+
+        deleteUserAggregator.handleAuthenticationDelete(correlationId, event);
+    }
+
+    @RabbitListener(queues = Queues.USER_DELETE_RESULT_QUEUE)
+    public void handleUserDelete(Message message) throws Exception {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        BasicRabbitMqResultEvent event =
+                objectMapper.readValue(message.getBody(), BasicRabbitMqResultEvent.class);
+
+        deleteUserAggregator.handleUserDelete(correlationId, event);
     }
 }

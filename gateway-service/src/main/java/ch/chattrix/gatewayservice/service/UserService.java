@@ -1,9 +1,6 @@
 package ch.chattrix.gatewayservice.service;
 
-import ch.chattrix.gatewayservice.aggregator.EditCredentialAggregator;
-import ch.chattrix.gatewayservice.aggregator.EditUsernameAggregator;
-import ch.chattrix.gatewayservice.aggregator.GetAllUsersAggregator;
-import ch.chattrix.gatewayservice.aggregator.GetOneUserAggregator;
+import ch.chattrix.gatewayservice.aggregator.*;
 import ch.chattrix.gatewayservice.rabbitmq.RabbitCommandPublisher;
 import ch.chattrix.shared.command.EmptyBasicCommand;
 import ch.chattrix.shared.command.UserEditCredentialCommand;
@@ -26,16 +23,18 @@ public class UserService {
     private final GetAllUsersAggregator getAllUsersAggregator;
     private final GetOneUserAggregator getOneUserAggregator;
     private final EditUsernameAggregator editUsernameAggregator;
+    private final DeleteUserAggregator deleteUserAggregator;
 
     public UserService(
             RabbitCommandPublisher publisher,
             GetAllUsersAggregator getAllUsersAggregator,
             GetOneUserAggregator getOneUserAggregator,
-            EditUsernameAggregator editUsernameAggregator) {
+            EditUsernameAggregator editUsernameAggregator, DeleteUserAggregator deleteUserAggregator) {
         this.publisher = publisher;
         this.getAllUsersAggregator = getAllUsersAggregator;
         this.getOneUserAggregator = getOneUserAggregator;
         this.editUsernameAggregator = editUsernameAggregator;
+        this.deleteUserAggregator = deleteUserAggregator;
     }
 
     public ApiResponse<List<UserAnonymData>> getAllUsers() {
@@ -104,6 +103,37 @@ public class UserService {
 
         publisher.sendEditUsernameRequest(
                 new UserEditUsernameCommand(userUuid, username),
+                correlationId
+        );
+
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+
+            future.cancel(true);
+
+            ApiResponse<Void> response = new ApiResponse<>();
+            response.setSuccess(false);
+            response.setMessage("TIMEOUT_OR_ERROR");
+            response.setData(null);
+            return response;
+        }
+    }
+
+    public ApiResponse<Void> deleteUser(UUID userUuid) {
+
+        String correlationId = UUID.randomUUID().toString();
+
+        CompletableFuture<ApiResponse<Void>> future =
+                deleteUserAggregator.createDelete(correlationId);
+
+        publisher.sendAuthDeletionRequest(
+                new UserUuidBasicCommand(userUuid),
+                correlationId
+        );
+
+        publisher.sendUserDeletionRequest(
+                new UserUuidBasicCommand(userUuid),
                 correlationId
         );
 

@@ -9,6 +9,9 @@ import ch.chattrix.shared.types.UserAnonymData;
 import ch.chattrix.shared.types.UserData;
 import ch.chattrix.shared.utils.JwtValidator;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -83,5 +86,32 @@ public class UserController {
                 request.getUsername(),
                 userUuid
         );
+    }
+
+    @DeleteMapping("/delete")
+    public ApiResponse<Void> deleteUser(
+            @CookieValue(value = "accessToken", required = false) String token, HttpServletResponse response) {
+
+        if (token == null || !jwtValidator.isTokenValid(token)) {
+            return new ApiResponse<>(false, "INVALID_ACCESS_TOKEN", null);
+        }
+
+        UUID userUuid = UUID.fromString(jwtValidator.extractSubject(token));
+
+        deleteCookies(response);
+
+
+        return userService.deleteUser(
+                userUuid
+        );
+    }
+
+    static void deleteCookies(HttpServletResponse response) {
+        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "").httpOnly(true).secure(false).path("/").sameSite("Lax").maxAge(0).build();
+
+        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "").httpOnly(true).secure(false).path("/").sameSite("Lax").maxAge(0).build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteAccess.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteRefresh.toString());
     }
 }

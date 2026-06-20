@@ -78,4 +78,12 @@ public class RabbitCommandPublisher {
     public void sendEditUsernameRequest(UserEditUsernameCommand cmd, String correlationId) {
         sendToUserExchange(cmd, RoutingKeys.USER_EDIT_USERNAME, correlationId);
     }
+
+    public void sendUserDeletionRequest(UserUuidBasicCommand cmd, String correlationId) {
+        sendToUserExchange(cmd, RoutingKeys.USER_DELETE, correlationId);
+    }
+
+    public void sendAuthDeletionRequest(UserUuidBasicCommand cmd, String correlationId) {
+        sendToAuthExchange(cmd, RoutingKeys.AUTH_DELETE, correlationId);
+    }
 }

@@ -349,4 +349,59 @@ public class AuthenticationListener {
             );
         }
     }
+
+    @RabbitListener(queues = Queues.AUTH_DELETE_QUEUE)
+    public void handleDelete(Message message) {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        try {
+            UserUuidBasicCommand command =
+                    objectMapper.readValue(message.getBody(), UserUuidBasicCommand.class);
+
+            ApiResponse<Void> serviceResponse =
+                    authService.delete(
+                            command.getUserUuid()
+                    );
+
+            BasicRabbitMqResultEvent result = new BasicRabbitMqResultEvent();
+            result.setSuccess(serviceResponse.isSuccess());
+            result.setErrorMessage(
+                    serviceResponse.isSuccess()
+                            ? null
+                            : serviceResponse.getMessage()
+            );
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.AUTHENTICATION_RESPONSE,
+                    RoutingKeys.AUTH_RESULT_DELETE,
+                    result,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+
+        } catch (Exception e) {
+
+            BasicRabbitMqResultEvent result = new BasicRabbitMqResultEvent();
+            result.setSuccess(false);
+            result.setErrorMessage(
+                    e.getMessage() != null
+                            ? e.getMessage()
+                            : "UNKNOWN_ERROR"
+            );
+
+            rabbitTemplate.convertAndSend(
+                    Exchanges.AUTHENTICATION_RESPONSE,
+                    RoutingKeys.AUTH_RESULT_DELETE,
+                    result,
+                    msg -> {
+                        msg.getMessageProperties().setCorrelationId(correlationId);
+                        return msg;
+                    }
+            );
+        }
+    }
 }

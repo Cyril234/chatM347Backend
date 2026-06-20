@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -36,7 +35,7 @@ public class UserService {
         try {
             User user = new User();
             user.setUserUuid(userUuid);
-            user.setUsername(username);
+            user.setUsername(username.trim());
             user.setCreatedAt(new Date());
             user.setUpdatedAt(new Date());
 
@@ -51,12 +50,12 @@ public class UserService {
 
     public ApiResponse<List<UserAnonymData>> getAll() {
         try {
-            List<User> users = userRepository.findAll();
-            List<UserAnonymData> userAnonymData = new java.util.ArrayList<>(List.of());
-            for (User user : users) {
-                userAnonymData.add(new UserAnonymData(user.getUsername(), user.getUserUuid()));
-            }
-            return new ApiResponse<>(true, "USER_GET_ALL_SUCCESSFULLY", userAnonymData);
+            List<UserAnonymData> result = userRepository.findAll()
+                    .stream()
+                    .map(user -> new UserAnonymData(user.getUsername(), user.getUserUuid()))
+                    .toList();
+
+            return new ApiResponse<>(true, "USER_GET_ALL_SUCCESSFULLY", result);
 
         } catch (Exception e) {
             return new ApiResponse<>(false, "USER_GET_ALL_FAILED", null);
@@ -66,20 +65,16 @@ public class UserService {
     public ApiResponse<UserBaseData> getOne(UUID userUuid) {
 
         try {
-            Optional<User> userOpt = userRepository.findByUserUuid(userUuid);
+            return userRepository.findByUserUuid(userUuid)
+                    .map(user -> {
+                        UserBaseData data = new UserBaseData();
+                        data.setUserUuid(user.getUserUuid());
+                        data.setUsername(user.getUsername());
+                        data.setCreatedAt(user.getCreatedAt());
 
-            if (userOpt.isEmpty()) {
-                return new ApiResponse<>(false, "USER_NOT_FOUND", null);
-            }
-
-            User user = userOpt.get();
-
-            UserBaseData data = new UserBaseData();
-            data.setUserUuid(user.getUserUuid());
-            data.setUsername(user.getUsername());
-            data.setCreatedAt(user.getCreatedAt());
-
-            return new ApiResponse<>(true, "USER_GET_ONE_SUCCESS", data);
+                        return new ApiResponse<>(true, "USER_GET_ONE_SUCCESS", data);
+                    })
+                    .orElseGet(() -> new ApiResponse<>(false, "USER_NOT_FOUND", null));
 
         } catch (Exception e) {
             return new ApiResponse<>(false, "USER_GET_ONE_FAILED", null);
@@ -89,18 +84,18 @@ public class UserService {
     @Transactional
     public ApiResponse<Void> editUsername(UUID userUuid, String username) {
 
+        if (username == null || username.isBlank()) {
+            return new ApiResponse<>(false, "NO_USERNAME_PROVIDED", null);
+        }
+
+        username = username.trim();
+
         User user = userRepository.findByUserUuid(userUuid)
                 .orElse(null);
 
         if (user == null) {
             return new ApiResponse<>(false, "USER_NOT_FOUND", null);
         }
-
-        if (username == null || username.isBlank()) {
-            return new ApiResponse<>(false, "NO_USERNAME_PROVIDED", null);
-        }
-
-        username = username.trim();
 
         if (userRepository.existsByUsernameAndUserUuidNot(username, userUuid)) {
             return new ApiResponse<>(false, "USERNAME_ALREADY_EXISTS", null);
@@ -110,5 +105,25 @@ public class UserService {
         user.setUpdatedAt(Date.from(Instant.now()));
 
         return new ApiResponse<>(true, "USER_EDIT_USERNAME_SUCCESS", null);
+    }
+
+    @Transactional
+    public ApiResponse<Void> delete(UUID userUuid) {
+
+        try {
+            User user = userRepository.findByUserUuid(userUuid)
+                    .orElse(null);
+
+            if (user == null) {
+                return new ApiResponse<>(false, "USER_NOT_FOUND", null);
+            }
+
+            userRepository.delete(user);
+
+            return new ApiResponse<>(true, "USER_DELETE_SUCCESS", null);
+
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "USER_DELETE_FAILED", null);
+        }
     }
 }

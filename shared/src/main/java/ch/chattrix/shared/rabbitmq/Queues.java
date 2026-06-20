@@ -10,6 +10,8 @@ public class Queues {
     public static final String USER_REGISTER_QUEUE = "user.register.queue";
     public static final String USER_GET_ALL_QUEUE = "user.get.all.queue";
     public static final String USER_EDIT_USERNAME_QUEUE = "user.edit.username.queue";
+    public static final String USER_DELETE_QUEUE = "user.delete.queue";
+    public static final String AUTH_DELETE_QUEUE = "auth.delete.queue";
     public static final String USER_GET_BASE_DATA_QUEUE = "user.get.base.data.queue";
     public static final String AUTH_REGISTER_RESULT_QUEUE = "auth.register.result.queue";
     public static final String AUTH_LOGIN_RESULT_QUEUE = "auth.login.result.queue";
@@ -20,5 +22,7 @@ public class Queues {
     public static final String AUTH_EDIT_CREDENTIAL_RESULT_QUEUE = "auth.edit.credential.result.queue";
     public static final String USER_REGISTER_RESULT_QUEUE = "user.register.result.queue";
     public static final String USER_GET_ALL_RESULT_QUEUE = "user.get.all.result.queue";
+    public static final String USER_DELETE_RESULT_QUEUE = "user.delete.result.queue";
+    public static final String AUTH_DELETE_RESULT_QUEUE = "user.delete.result.queue";
     public static final String USER_GET_BASE_DATA_RESULT_QUEUE = "user.get.base.data.result.queue";
 }

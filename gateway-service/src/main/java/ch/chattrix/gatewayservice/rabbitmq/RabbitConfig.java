@@ -46,6 +46,16 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue authDeleteResultQueue() {
+        return new Queue(Queues.AUTH_DELETE_RESULT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue userDeleteResultQueue() {
+        return new Queue(Queues.USER_DELETE_RESULT_QUEUE, true);
+    }
+
+    @Bean
     public Queue authLoginResultQueue() {
         return new Queue(Queues.AUTH_LOGIN_RESULT_QUEUE, true);
     }
@@ -161,6 +171,22 @@ public class RabbitConfig {
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
         return new Jackson2JsonMessageConverter(mapper);
+    }
+
+    @Bean
+    public Binding userDeleteResultBinding() {
+        return BindingBuilder
+                .bind(userDeleteResultQueue())
+                .to(userResponseExchange())
+                .with(RoutingKeys.USER_RESULT_DELETE);
+    }
+
+    @Bean
+    public Binding authDeleteResultBinding() {
+        return BindingBuilder
+                .bind(authDeleteResultQueue())
+                .to(authenticationResponseExchange())
+                .with(RoutingKeys.AUTH_RESULT_DELETE);
     }
 
     @Bean
