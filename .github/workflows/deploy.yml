@@ -22,6 +22,8 @@ jobs:
         run: echo "sha_tag=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
   # ── 2. Build & Push aller Backend-Services ──────────────────────────────────
+  # WICHTIG: Multi-Module Maven Projekt -> Build-Context ist IMMER das Repo-Root (.),
+  # nicht der einzelne Service-Ordner! Sonst findet Maven die Parent-pom.xml nicht.
   build-and-push:
     name: Build & Push – ${{ matrix.service }}
     runs-on: ubuntu-latest
@@ -61,7 +63,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.service }}
+          # Build-Context = Repo-Root, da Multi-Module Maven Projekt
+          context: .
+          file: ./docker/${{ matrix.service }}.Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -132,7 +136,7 @@ jobs:
 
       - name: Copy docker-compose files to VM
         run: |
-          scp -i ~/.ssh/id_ed25519 -r ./docker/* deploy@${{ env.VM_IP }}:/opt/chattrix/
+          scp -i ~/.ssh/id_ed25519 -r ./docker-compose-files/* deploy@${{ env.VM_IP }}:/opt/chattrix/
 
       - name: Write .env on VM
         run: |
