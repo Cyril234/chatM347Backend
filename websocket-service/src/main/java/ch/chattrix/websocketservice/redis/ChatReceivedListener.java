@@ -1,6 +1,6 @@
 package ch.chattrix.websocketservice.redis;
 
-import ch.chattrix.shared.redis.event.ChatsReceivedEvent;
+import ch.chattrix.shared.redis.event.ChatReceivedEvent;
 import ch.chattrix.websocketservice.registry.WebSocketSessionRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 @Component
 @RequiredArgsConstructor
-public class ChatsReceivedListener implements MessageListener {
+public class ChatReceivedListener implements MessageListener {
 
     private final ObjectMapper objectMapper;
     private final WebSocketSessionRegistry sessionRegistry;
@@ -20,8 +20,8 @@ public class ChatsReceivedListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            ChatsReceivedEvent event =
-                    objectMapper.readValue(message.getBody(), ChatsReceivedEvent.class);
+            ChatReceivedEvent event =
+                    objectMapper.readValue(message.getBody(), ChatReceivedEvent.class);
 
             if (event.getUserUuid() == null) {
                 return;

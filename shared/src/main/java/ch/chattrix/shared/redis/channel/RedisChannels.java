@@ -5,4 +5,6 @@ public class RedisChannels {
     public static final String CHAT_CREATED = "chat.created";
     public static final String CHATS_GET = "chats.get";
     public static final String CHATS_RECEIVED = "chats.received";
+    public static final String CHAT_GET = "chat.get";
+    public static final String CHAT_RECEIVED = "chat.received";
 }

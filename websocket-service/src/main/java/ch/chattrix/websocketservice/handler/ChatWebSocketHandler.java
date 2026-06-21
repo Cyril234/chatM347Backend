@@ -2,7 +2,8 @@ package ch.chattrix.websocketservice.handler;
 
 import ch.chattrix.shared.enums.ChatType;
 import ch.chattrix.shared.redis.event.ChatCreateEvent;
-import ch.chattrix.shared.redis.event.GetChatsEvent;
+import ch.chattrix.shared.redis.event.ChatGetEvent;
+import ch.chattrix.shared.redis.event.ChatsGetEvent;
 import ch.chattrix.websocketservice.redis.ChatMessagePublisher;
 import ch.chattrix.websocketservice.registry.WebSocketSessionRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -81,12 +82,25 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
             UUID userUuid = (UUID) session.getAttributes().get("userUuid");
 
-            GetChatsEvent event = GetChatsEvent.builder()
+            ChatsGetEvent event = ChatsGetEvent.builder()
                     .userUuid(userUuid)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
             publisher.getChats(event);
+        }
+
+        if ("GET_CHAT".equals(eventType)) {
+
+            UUID userUuid = (UUID) session.getAttributes().get("userUuid");
+
+            ChatGetEvent event = ChatGetEvent.builder()
+                    .userUuid(userUuid)
+                    .chatUuid(UUID.fromString(node.get("chatUuid").asText()))
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+
+            publisher.getChat(event);
         }
     }
 }

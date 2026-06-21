@@ -13,8 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReceivedChatsEvent {
-
+public class ChatsReceivedEvent {
     private UUID userUuid;
     private List<ChatDto> chats;
 }

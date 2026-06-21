@@ -2,7 +2,8 @@ package ch.chattrix.websocketservice.redis;
 
 import ch.chattrix.shared.redis.channel.RedisChannels;
 import ch.chattrix.shared.redis.event.ChatCreateEvent;
-import ch.chattrix.shared.redis.event.GetChatsEvent;
+import ch.chattrix.shared.redis.event.ChatGetEvent;
+import ch.chattrix.shared.redis.event.ChatsGetEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -26,10 +27,21 @@ public class ChatMessagePublisher {
         }
     }
 
-    public void getChats(GetChatsEvent event) {
+    public void getChats(ChatsGetEvent event) {
         try {
             redisTemplate.convertAndSend(
                     RedisChannels.CHATS_GET,
+                    objectMapper.writeValueAsString(event)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void getChat(ChatGetEvent event) {
+        try {
+            redisTemplate.convertAndSend(
+                    RedisChannels.CHAT_GET,
                     objectMapper.writeValueAsString(event)
             );
         } catch (Exception e) {

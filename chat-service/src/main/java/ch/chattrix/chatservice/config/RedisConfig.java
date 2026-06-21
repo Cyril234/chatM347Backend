@@ -1,6 +1,7 @@
 package ch.chattrix.chatservice.config;
 
 import ch.chattrix.chatservice.redis.ChatCreateListener;
+import ch.chattrix.chatservice.redis.GetChatListener;
 import ch.chattrix.chatservice.redis.GetChatsListener;
 import ch.chattrix.shared.redis.channel.RedisChannels;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +35,16 @@ public class RedisConfig {
     }
 
     @Bean
+    public ChannelTopic chatGetTopic() {
+        return new ChannelTopic(RedisChannels.CHAT_GET);
+    }
+
+    @Bean
+    public ChannelTopic chatReceivedTopic() {
+        return new ChannelTopic(RedisChannels.CHAT_RECEIVED);
+    }
+
+    @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory factory) {
         return new StringRedisTemplate(factory);
     }
@@ -42,7 +53,8 @@ public class RedisConfig {
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory factory,
             ChatCreateListener chatCreateListener,
-            GetChatsListener getChatsListener
+            GetChatsListener getChatsListener,
+            GetChatListener getChatListener
     ) {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -56,6 +68,11 @@ public class RedisConfig {
         container.addMessageListener(
                 getChatsListener,
                 chatsGetTopic()
+        );
+
+        container.addMessageListener(
+                getChatListener,
+                chatGetTopic()
         );
 
         return container;
