@@ -13,11 +13,6 @@ services:
     volumes:
       - chattrix-mariadb-data:/var/lib/mysql
       - ./mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

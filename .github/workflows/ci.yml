@@ -1,12 +1,14 @@
 name: CI Pipeline
 
+# Reine Build/Test-Validierung bei jedem Push & PR – baut nur die Services,
+# deren Code sich geändert hat. Pusht NICHTS und deployed NICHTS – das
+# übernimmt der separate "Build → Push → Deploy" Workflow (deploy.yml).
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   changes:
@@ -57,7 +59,9 @@ jobs:
         run: mvn -f pom.xml -pl authentication-service -am clean package
 
       - name: Build Docker Image
-        run: docker build -t authentication-service:latest ./authentication-service
+        # WICHTIG: Build-Context = Repo-Root (.), nicht ./authentication-service,
+        # da Multi-Module Maven Projekt -> Maven braucht die Parent-pom.xml im Context.
+        run: docker build -f docker/authentication-service.Dockerfile -t authentication-service:latest .
 
   build-user-service:
     needs: changes
@@ -77,7 +81,7 @@ jobs:
         run: mvn -f pom.xml -pl user-service -am clean package
 
       - name: Build Docker Image
-        run: docker build -t user-service:latest ./user-service
+        run: docker build -f docker/user-service.Dockerfile -t user-service:latest .
 
   build-chat-service:
     needs: changes
@@ -97,7 +101,7 @@ jobs:
         run: mvn -f pom.xml -pl chat-service -am clean package
 
       - name: Build Docker Image
-        run: docker build -t chat-service:latest ./chat-service
+        run: docker build -f docker/chat-service.Dockerfile -t chat-service:latest .
 
   build-gateway-service:
     needs: changes
@@ -117,7 +121,7 @@ jobs:
         run: mvn -f pom.xml -pl gateway-service -am clean package
 
       - name: Build Docker Image
-        run: docker build -t gateway-service:latest ./gateway-service
+        run: docker build -f docker/gateway-service.Dockerfile -t gateway-service:latest .
 
   build-websocket-service:
     needs: changes
@@ -137,4 +141,4 @@ jobs:
         run: mvn -f pom.xml -pl websocket-service -am clean package
 
       - name: Build Docker Image
-        run: docker build -t websocket-service:latest ./websocket-service
+        run: docker build -f docker/websocket-service.Dockerfile -t websocket-service:latest .
