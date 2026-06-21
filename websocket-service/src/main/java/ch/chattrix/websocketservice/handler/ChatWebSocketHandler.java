@@ -2,6 +2,7 @@ package ch.chattrix.websocketservice.handler;
 
 import ch.chattrix.shared.enums.ChatType;
 import ch.chattrix.shared.redis.event.ChatCreateEvent;
+import ch.chattrix.shared.redis.event.ChatEditEvent;
 import ch.chattrix.shared.redis.event.ChatGetEvent;
 import ch.chattrix.shared.redis.event.ChatsGetEvent;
 import ch.chattrix.websocketservice.redis.ChatMessagePublisher;
@@ -101,6 +102,21 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                     .build();
 
             publisher.getChat(event);
+        }
+
+        if ("EDIT_CHAT".equals(eventType)) {
+            List<UUID> memberUuids = objectMapper.convertValue(
+                    node.get("memberUuids"),
+                    objectMapper.getTypeFactory()
+                            .constructCollectionType(List.class, UUID.class)
+            );
+            ChatEditEvent event = ChatEditEvent.builder()
+                    .chatUuid(UUID.fromString(node.get("chatUuid").asText()))
+                    .memberUuids(memberUuids)
+                    .name(node.get("name").asText())
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            publisher.editChat(event);
         }
     }
 }

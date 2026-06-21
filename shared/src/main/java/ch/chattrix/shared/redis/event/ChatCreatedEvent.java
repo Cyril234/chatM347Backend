@@ -12,6 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatCreatedEvent {
-    private ChatDto chatDto;
+    private ChatDto chat;
     private long createdAt;
 }

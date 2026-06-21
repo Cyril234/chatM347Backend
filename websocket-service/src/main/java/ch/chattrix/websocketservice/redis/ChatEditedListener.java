@@ -1,6 +1,6 @@
 package ch.chattrix.websocketservice.redis;
 
-import ch.chattrix.shared.redis.event.ChatCreatedEvent;
+import ch.chattrix.shared.redis.event.ChatEditedEvent;
 import ch.chattrix.websocketservice.registry.WebSocketSessionRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class ChatCreatedListener implements MessageListener {
+public class ChatEditedListener implements MessageListener {
 
     private final ObjectMapper objectMapper;
     private final WebSocketSessionRegistry sessionRegistry;
@@ -22,8 +22,8 @@ public class ChatCreatedListener implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
-            ChatCreatedEvent event =
-                    objectMapper.readValue(message.getBody(), ChatCreatedEvent.class);
+            ChatEditedEvent event =
+                    objectMapper.readValue(message.getBody(), ChatEditedEvent.class);
 
             if (event.getChat() == null ||
                     event.getChat().getMemberUuids() == null) {

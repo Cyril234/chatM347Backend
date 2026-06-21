@@ -4,40 +4,51 @@ import ch.chattrix.chatservice.model.Chat;
 import ch.chattrix.chatservice.repository.ChatRepository;
 import ch.chattrix.shared.dto.ChatDto;
 import ch.chattrix.shared.redis.channel.RedisChannels;
-import ch.chattrix.shared.redis.event.ChatCreateEvent;
-import ch.chattrix.shared.redis.event.ChatCreatedEvent;
+import ch.chattrix.shared.redis.event.ChatEditEvent;
+import ch.chattrix.shared.redis.event.ChatEditedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class ChatCreateListener implements MessageListener {
+public class EditChatListener implements MessageListener {
 
     private final ChatRepository chatRepository;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
     @Override
-    public void onMessage(org.springframework.data.redis.connection.Message redisMessage, byte[] pattern) {
+    public void onMessage(Message redisMessage, byte[] pattern) {
         try {
             String body = new String(redisMessage.getBody());
 
-            ChatCreateEvent event =
-                    objectMapper.readValue(body, ChatCreateEvent.class);
+            ChatEditEvent event =
+                    objectMapper.readValue(body, ChatEditEvent.class);
 
-            Chat chat = new Chat();
-            chat.setChatUuid(UUID.randomUUID());
-            chat.setName(event.getName());
-            chat.setCreatorUuid(event.getCreatorUuid());
-            chat.setMemberUuids(event.getMemberUuids());
-            chat.setChatType(event.getChatType());
-            chat.setCreatedAt(new Date());
+            UUID chatUuid = event.getChatUuid();
+
+            Optional<Chat> optionalChat = chatRepository.findByChatUuid(chatUuid);
+
+            if (optionalChat.isEmpty()) {
+                return;
+            }
+
+            Chat chat = optionalChat.get();
+
+            if (event.getName() != null) {
+                chat.setName(event.getName());
+            }
+
+            if (event.getMemberUuids() != null && !event.getMemberUuids().isEmpty()) {
+                chat.setMemberUuids(event.getMemberUuids());
+            }
 
             Chat saved = chatRepository.save(chat);
 
@@ -49,14 +60,13 @@ public class ChatCreateListener implements MessageListener {
             chatDto.setMemberUuids(saved.getMemberUuids());
             chatDto.setCreatedAt(saved.getCreatedAt());
 
-            ChatCreatedEvent createdEvent = ChatCreatedEvent.builder()
+            ChatEditedEvent editedEvent = ChatEditedEvent.builder()
                     .chat(chatDto)
-                    .createdAt(saved.getCreatedAt().getTime())
                     .build();
 
             redisTemplate.convertAndSend(
-                    RedisChannels.CHAT_CREATED,
-                    objectMapper.writeValueAsString(createdEvent)
+                    RedisChannels.CHAT_EDITED,
+                    objectMapper.writeValueAsString(editedEvent)
             );
 
         } catch (Exception e) {

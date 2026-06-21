@@ -2,6 +2,7 @@ package ch.chattrix.websocketservice.config;
 
 import ch.chattrix.shared.redis.channel.RedisChannels;
 import ch.chattrix.websocketservice.redis.ChatCreatedListener;
+import ch.chattrix.websocketservice.redis.ChatEditedListener;
 import ch.chattrix.websocketservice.redis.ChatReceivedListener;
 import ch.chattrix.websocketservice.redis.ChatsReceivedListener;
 import org.springframework.context.annotation.Bean;
@@ -29,11 +30,17 @@ public class RedisConfig {
     }
 
     @Bean
+    public ChannelTopic chatEditedTopic() {
+        return new ChannelTopic(RedisChannels.CHAT_EDITED);
+    }
+
+    @Bean
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory factory,
             ChatCreatedListener chatCreatedListener,
             ChatsReceivedListener chatsReceivedListener,
-            ChatReceivedListener chatReceivedListener
+            ChatReceivedListener chatReceivedListener,
+            ChatEditedListener chatEditedListener
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(factory);
@@ -51,6 +58,11 @@ public class RedisConfig {
         container.addMessageListener(
                 chatReceivedListener,
                 chatReceivedTopic()
+        );
+
+        container.addMessageListener(
+                chatEditedListener,
+                chatEditedTopic()
         );
 
         return container;
