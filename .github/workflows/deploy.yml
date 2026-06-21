@@ -182,8 +182,3 @@ jobs:
              sudo docker compose pull && \
              sudo docker compose up -d --remove-orphans && \
              sudo docker image prune -f"
-
-      - name: Health check
-        run: |
-          sleep 15
-          curl -f http://${{ env.VM_IP }}/api/health || echo "Health check fehlgeschlagen – bitte Logs prüfen"
