@@ -63,6 +63,16 @@ public class RedisConfig {
     }
 
     @Bean
+    public ChannelTopic chatMessagesGetTopic() {
+        return new ChannelTopic(RedisChannels.CHAT_MESSAGES_GET);
+    }
+
+    @Bean
+    public ChannelTopic chatMessagesReceivedTopic() {
+        return new ChannelTopic(RedisChannels.CHAT_MESSAGES_RECEIVED);
+    }
+
+    @Bean
     public ChannelTopic messageSendTopic() {
         return new ChannelTopic(RedisChannels.MESSAGE_SEND);
     }
@@ -85,7 +95,8 @@ public class RedisConfig {
             GetChatListener getChatListener,
             EditChatListener editChatListener,
             DeleteChatListener deleteChatListener,
-            MessageSendListener messageSendListener
+            MessageSendListener messageSendListener,
+            GetChatMessagesListener getChatMessagesListener
     ) {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -96,7 +107,7 @@ public class RedisConfig {
         container.addMessageListener(getChatListener, chatGetTopic());
         container.addMessageListener(editChatListener, chatEditTopic());
         container.addMessageListener(deleteChatListener, chatDeleteTopic());
-
+        container.addMessageListener(getChatMessagesListener, chatMessagesGetTopic());
         container.addMessageListener(messageSendListener, messageSendTopic());
 
         return container;

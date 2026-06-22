@@ -155,5 +155,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
             messagePublisher.sendMessage(event);
         }
+
+        if ("GET_CHAT_MESSAGES".equals(eventType)) {
+
+            UUID userUuid = (UUID) session.getAttributes().get("userUuid");
+
+            ChatMessagesGetEvent event = ChatMessagesGetEvent.builder()
+                    .chatUuid(UUID.fromString(node.get("chatUuid").asText()))
+                    .userUuid(userUuid)
+                    .build();
+
+            messagePublisher.getChatMessages(event);
+        }
     }
 }
