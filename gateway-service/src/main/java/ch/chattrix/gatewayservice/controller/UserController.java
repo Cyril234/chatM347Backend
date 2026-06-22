@@ -107,18 +107,6 @@ public class UserController {
         );
     }
 
-    @PostMapping("/usernames")
-    public ApiResponse<Map<UUID, String>> getUsernames(
-            @RequestBody List<UUID> userUuids,
-            @CookieValue(value = "accessToken", required = false) String token
-    ) {
-        if (token == null || !jwtValidator.isTokenValid(token)) {
-            return new ApiResponse<>(false, "INVALID_ACCESS_TOKEN", null);
-        }
-
-        return userService.getUsernames(userUuids);
-    }
-
     static void deleteCookies(HttpServletResponse response) {
         ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "").httpOnly(true).secure(false).path("/").sameSite("Lax").maxAge(0).build();
 

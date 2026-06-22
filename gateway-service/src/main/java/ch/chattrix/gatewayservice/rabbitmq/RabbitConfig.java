@@ -89,11 +89,6 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue userGetUsernamesResultQueue() {
-        return new Queue(Queues.USER_GET_USERNAMES_RESULT_QUEUE, true);
-    }
-
-    @Bean
     public Binding userRegisterResultBinding() {
         return BindingBuilder
                 .bind(userRegisterResultQueue())
@@ -195,14 +190,6 @@ public class RabbitConfig {
                 .bind(authDeleteResultQueue())
                 .to(authenticationResponseExchange())
                 .with(RoutingKeys.AUTH_RESULT_DELETE);
-    }
-
-    @Bean
-    public Binding userGetUsernamesResultBinding() {
-        return BindingBuilder
-                .bind(userGetUsernamesResultQueue())
-                .to(userResponseExchange())
-                .with(RoutingKeys.USER_RESULT_GET_USERNAMES);
     }
 
     @Bean
