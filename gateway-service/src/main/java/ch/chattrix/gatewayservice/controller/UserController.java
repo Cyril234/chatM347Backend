@@ -15,6 +15,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -104,6 +105,18 @@ public class UserController {
         return userService.deleteUser(
                 userUuid
         );
+    }
+
+    @PostMapping("/usernames")
+    public ApiResponse<Map<UUID, String>> getUsernames(
+            @RequestBody List<UUID> userUuids,
+            @CookieValue(value = "accessToken", required = false) String token
+    ) {
+        if (token == null || !jwtValidator.isTokenValid(token)) {
+            return new ApiResponse<>(false, "INVALID_ACCESS_TOKEN", null);
+        }
+
+        return userService.getUsernames(userUuids);
     }
 
     static void deleteCookies(HttpServletResponse response) {

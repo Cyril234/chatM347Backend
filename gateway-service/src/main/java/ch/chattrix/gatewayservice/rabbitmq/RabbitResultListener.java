@@ -21,6 +21,7 @@ public class RabbitResultListener {
     private final EditCredentialAggregator editCredentialAggregator;
     private final EditUsernameAggregator editUsernameAggregator;
     private final DeleteUserAggregator deleteUserAggregator;
+    private final GetUsernamesAggregator getUsernamesAggregator;
 
     public RabbitResultListener(
             RegistrationAggregator registrationAggregator,
@@ -30,7 +31,7 @@ public class RabbitResultListener {
             LogoutAggregator logoutAggregator,
             GetOneUserAggregator getOneUserAggregator,
             GetAllUsersAggregator getAllUsersAggregator,
-            EditCredentialAggregator editCredentialAggregator, EditUsernameAggregator editUsernameAggregator, DeleteUserAggregator deleteUserAggregator) {
+            EditCredentialAggregator editCredentialAggregator, EditUsernameAggregator editUsernameAggregator, DeleteUserAggregator deleteUserAggregator, GetUsernamesAggregator getUsernamesAggregator) {
         this.registrationAggregator = registrationAggregator;
         this.loginAggregator = loginAggregator;
         this.objectMapper = objectMapper;
@@ -41,6 +42,7 @@ public class RabbitResultListener {
         this.editCredentialAggregator = editCredentialAggregator;
         this.editUsernameAggregator = editUsernameAggregator;
         this.deleteUserAggregator = deleteUserAggregator;
+        this.getUsernamesAggregator = getUsernamesAggregator;
     }
 
     @RabbitListener(queues = Queues.AUTH_REGISTER_RESULT_QUEUE)
@@ -190,5 +192,17 @@ public class RabbitResultListener {
                 objectMapper.readValue(message.getBody(), BasicRabbitMqResultEvent.class);
 
         deleteUserAggregator.handleUserDelete(correlationId, event);
+    }
+
+    @RabbitListener(queues = Queues.USER_GET_USERNAMES_RESULT_QUEUE)
+    public void handleGetUsernames(Message message) throws Exception {
+
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (correlationId == null) return;
+
+        GetUsernamesResultEvent event =
+                objectMapper.readValue(message.getBody(), GetUsernamesResultEvent.class);
+
+        getUsernamesAggregator.handleUsernames(correlationId, event);
     }
 }

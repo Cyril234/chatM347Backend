@@ -1,12 +1,10 @@
 package ch.chattrix.gatewayservice.service;
 
-import ch.chattrix.gatewayservice.aggregator.DeleteUserAggregator;
-import ch.chattrix.gatewayservice.aggregator.EditUsernameAggregator;
-import ch.chattrix.gatewayservice.aggregator.GetAllUsersAggregator;
-import ch.chattrix.gatewayservice.aggregator.GetOneUserAggregator;
+import ch.chattrix.gatewayservice.aggregator.*;
 import ch.chattrix.gatewayservice.rabbitmq.RabbitCommandPublisher;
 import ch.chattrix.shared.rabbitmq.command.EmptyBasicCommand;
 import ch.chattrix.shared.rabbitmq.command.UserEditUsernameCommand;
+import ch.chattrix.shared.rabbitmq.command.UserUsernamesGetCommand;
 import ch.chattrix.shared.rabbitmq.command.UserUuidBasicCommand;
 import ch.chattrix.shared.response.ApiResponse;
 import ch.chattrix.shared.types.UserAnonymData;
@@ -14,6 +12,7 @@ import ch.chattrix.shared.types.UserData;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -26,17 +25,19 @@ public class UserService {
     private final GetOneUserAggregator getOneUserAggregator;
     private final EditUsernameAggregator editUsernameAggregator;
     private final DeleteUserAggregator deleteUserAggregator;
+    private final GetUsernamesAggregator getUsernamesAggregator;
 
     public UserService(
             RabbitCommandPublisher publisher,
             GetAllUsersAggregator getAllUsersAggregator,
             GetOneUserAggregator getOneUserAggregator,
-            EditUsernameAggregator editUsernameAggregator, DeleteUserAggregator deleteUserAggregator) {
+            EditUsernameAggregator editUsernameAggregator, DeleteUserAggregator deleteUserAggregator, GetUsernamesAggregator getUsernamesAggregator) {
         this.publisher = publisher;
         this.getAllUsersAggregator = getAllUsersAggregator;
         this.getOneUserAggregator = getOneUserAggregator;
         this.editUsernameAggregator = editUsernameAggregator;
         this.deleteUserAggregator = deleteUserAggregator;
+        this.getUsernamesAggregator = getUsernamesAggregator;
     }
 
     public ApiResponse<List<UserAnonymData>> getAllUsers() {
@@ -149,6 +150,34 @@ public class UserService {
             response.setSuccess(false);
             response.setMessage("TIMEOUT_OR_ERROR");
             response.setData(null);
+            return response;
+        }
+    }
+
+    public ApiResponse<Map<UUID, String>> getUsernames(List<UUID> userUuids) {
+
+        String correlationId = UUID.randomUUID().toString();
+
+        CompletableFuture<ApiResponse<Map<UUID, String>>> future =
+                getUsernamesAggregator.getUsernames(correlationId);
+
+        publisher.sendUserGetUsernamesRequest(
+                new UserUsernamesGetCommand(userUuids),
+                correlationId
+        );
+
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+
+        } catch (Exception e) {
+
+            future.cancel(true);
+
+            ApiResponse<Map<UUID, String>> response = new ApiResponse<>();
+            response.setSuccess(false);
+            response.setMessage("TIMEOUT_OR_ERROR");
+            response.setData(null);
+
             return response;
         }
     }
