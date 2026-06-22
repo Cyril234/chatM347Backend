@@ -11,6 +11,7 @@ import ch.chattrix.shared.redis.event.ChatMessagesGetEvent;
 import ch.chattrix.shared.redis.event.ChatMessagesReceivedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class GetChatMessagesListener implements MessageListener {

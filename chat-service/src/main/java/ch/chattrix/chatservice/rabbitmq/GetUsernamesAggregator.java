@@ -1,11 +1,13 @@
 package ch.chattrix.chatservice.rabbitmq;
 
 import ch.chattrix.shared.rabbitmq.event.GetUsernamesResultEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.*;
 
+@Profile("!test")
 @Component
 public class GetUsernamesAggregator {
 

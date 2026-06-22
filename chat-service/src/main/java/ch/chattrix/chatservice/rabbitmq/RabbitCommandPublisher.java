@@ -5,8 +5,10 @@ import ch.chattrix.shared.rabbitmq.RoutingKeys;
 import ch.chattrix.shared.rabbitmq.command.UserUsernamesGetCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class RabbitCommandPublisher {

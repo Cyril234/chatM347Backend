@@ -3,6 +3,7 @@ package ch.chattrix.chatservice.rabbitmq;
 import ch.chattrix.shared.rabbitmq.command.UserUsernamesGetCommand;
 import ch.chattrix.shared.rabbitmq.event.GetUsernamesResultEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class UsernameClient {

@@ -5,8 +5,10 @@ import ch.chattrix.shared.rabbitmq.event.GetUsernamesResultEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class RabbitResultListener {
