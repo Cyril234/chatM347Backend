@@ -2,7 +2,7 @@ package ch.chattrix.chatservice.redis;
 
 import ch.chattrix.chatservice.model.Chat;
 import ch.chattrix.chatservice.repository.ChatRepository;
-import ch.chattrix.shared.dto.ChatDto;
+import ch.chattrix.shared.dto.ChatResponse;
 import ch.chattrix.shared.redis.channel.RedisChannels;
 import ch.chattrix.shared.redis.event.ChatCreateEvent;
 import ch.chattrix.shared.redis.event.ChatCreatedEvent;
@@ -26,6 +26,7 @@ public class ChatCreateListener implements MessageListener {
     @Override
     public void onMessage(org.springframework.data.redis.connection.Message redisMessage, byte[] pattern) {
         try {
+
             String body = new String(redisMessage.getBody());
 
             ChatCreateEvent event =
@@ -41,22 +42,31 @@ public class ChatCreateListener implements MessageListener {
 
             Chat saved = chatRepository.save(chat);
 
-            ChatDto chatDto = new ChatDto();
-            chatDto.setChatUuid(saved.getChatUuid());
-            chatDto.setName(saved.getName());
-            chatDto.setCreatorUuid(saved.getCreatorUuid());
-            chatDto.setChatType(saved.getChatType());
-            chatDto.setMemberUuids(saved.getMemberUuids());
-            chatDto.setCreatedAt(saved.getCreatedAt());
+            ChatResponse chatResponse = new ChatResponse();
+            chatResponse.setChatUuid(saved.getChatUuid());
+            chatResponse.setName(saved.getName());
+            chatResponse.setCreatorUuid(saved.getCreatorUuid());
+            chatResponse.setChatType(saved.getChatType());
+            chatResponse.setMemberUuids(saved.getMemberUuids());
+            chatResponse.setCreatedAt(saved.getCreatedAt());
 
             ChatCreatedEvent createdEvent = ChatCreatedEvent.builder()
-                    .chat(chatDto)
+                    .chat(chatResponse)
                     .createdAt(saved.getCreatedAt().getTime())
                     .build();
 
             redisTemplate.convertAndSend(
                     RedisChannels.CHAT_CREATED,
                     objectMapper.writeValueAsString(createdEvent)
+            );
+
+            redisTemplate.convertAndSend(
+                    RedisChannels.CHAT_EDITED,
+                    objectMapper.writeValueAsString(
+                            ch.chattrix.shared.redis.event.ChatEditedEvent.builder()
+                                    .chat(chatResponse)
+                                    .build()
+                    )
             );
 
         } catch (Exception e) {

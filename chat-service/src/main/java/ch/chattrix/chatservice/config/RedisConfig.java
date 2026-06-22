@@ -63,6 +63,16 @@ public class RedisConfig {
     }
 
     @Bean
+    public ChannelTopic messageSendTopic() {
+        return new ChannelTopic(RedisChannels.MESSAGE_SEND);
+    }
+
+    @Bean
+    public ChannelTopic messageSentTopic() {
+        return new ChannelTopic(RedisChannels.MESSAGE_SENT);
+    }
+
+    @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory factory) {
         return new StringRedisTemplate(factory);
     }
@@ -74,36 +84,20 @@ public class RedisConfig {
             GetChatsListener getChatsListener,
             GetChatListener getChatListener,
             EditChatListener editChatListener,
-            DeleteChatListener deleteChatListener
+            DeleteChatListener deleteChatListener,
+            MessageSendListener messageSendListener
     ) {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(factory);
 
-        container.addMessageListener(
-                chatCreateListener,
-                chatCreateTopic()
-        );
+        container.addMessageListener(chatCreateListener, chatCreateTopic());
+        container.addMessageListener(getChatsListener, chatsGetTopic());
+        container.addMessageListener(getChatListener, chatGetTopic());
+        container.addMessageListener(editChatListener, chatEditTopic());
+        container.addMessageListener(deleteChatListener, chatDeleteTopic());
 
-        container.addMessageListener(
-                getChatsListener,
-                chatsGetTopic()
-        );
-
-        container.addMessageListener(
-                getChatListener,
-                chatGetTopic()
-        );
-
-        container.addMessageListener(
-                editChatListener,
-                chatEditTopic()
-        );
-
-        container.addMessageListener(
-                deleteChatListener,
-                chatDeleteTopic()
-        );
+        container.addMessageListener(messageSendListener, messageSendTopic());
 
         return container;
     }

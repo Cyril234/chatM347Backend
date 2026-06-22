@@ -1,6 +1,6 @@
 package ch.chattrix.shared.redis.event;
 
-import ch.chattrix.shared.dto.ChatDto;
+import ch.chattrix.shared.dto.ChatResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatEditedEvent {
-    private ChatDto chat;
+    private ChatResponse chat;
 }

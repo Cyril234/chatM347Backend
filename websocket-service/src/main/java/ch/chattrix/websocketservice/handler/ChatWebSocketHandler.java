@@ -3,6 +3,7 @@ package ch.chattrix.websocketservice.handler;
 import ch.chattrix.shared.enums.ChatType;
 import ch.chattrix.shared.redis.event.*;
 import ch.chattrix.websocketservice.redis.ChatMessagePublisher;
+import ch.chattrix.websocketservice.redis.MessagePublisher;
 import ch.chattrix.websocketservice.registry.WebSocketSessionRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper;
     private final ChatMessagePublisher publisher;
     private final WebSocketSessionRegistry sessionRegistry;
+    private final MessagePublisher messagePublisher;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -102,6 +104,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
 
         if ("EDIT_CHAT".equals(eventType)) {
+
             UUID userUuid = (UUID) session.getAttributes().get("userUuid");
 
             List<UUID> memberUuids = objectMapper.convertValue(
@@ -109,6 +112,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                     objectMapper.getTypeFactory()
                             .constructCollectionType(List.class, UUID.class)
             );
+
             ChatEditEvent event = ChatEditEvent.builder()
                     .userUuid(userUuid)
                     .chatUuid(UUID.fromString(node.get("chatUuid").asText()))
@@ -116,16 +120,20 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                     .name(node.get("name").asText())
                     .timestamp(System.currentTimeMillis())
                     .build();
+
             publisher.editChat(event);
         }
 
         if ("DELETE_CHAT".equals(eventType)) {
+
             UUID userUuid = (UUID) session.getAttributes().get("userUuid");
+
             List<UUID> memberUuids = objectMapper.convertValue(
                     node.get("memberUuids"),
                     objectMapper.getTypeFactory()
                             .constructCollectionType(List.class, UUID.class)
             );
+
             ChatDeleteEvent event = ChatDeleteEvent.builder()
                     .chatUuid(UUID.fromString(node.get("chatUuid").asText()))
                     .userUuid(userUuid)
@@ -133,6 +141,19 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                     .build();
 
             publisher.deleteChat(event);
+        }
+
+        if ("CREATE_MESSAGE".equals(eventType)) {
+
+            UUID senderUuid = (UUID) session.getAttributes().get("userUuid");
+
+            MessageSendEvent event = MessageSendEvent.builder()
+                    .chatUuid(UUID.fromString(node.get("chatUuid").asText()))
+                    .senderUuid(senderUuid)
+                    .content(node.get("content").asText())
+                    .build();
+
+            messagePublisher.sendMessage(event);
         }
     }
 }

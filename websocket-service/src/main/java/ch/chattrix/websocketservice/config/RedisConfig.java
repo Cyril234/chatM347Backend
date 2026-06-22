@@ -37,13 +37,19 @@ public class RedisConfig {
     }
 
     @Bean
+    public ChannelTopic messageSentTopic() {
+        return new ChannelTopic(RedisChannels.MESSAGE_SENT);
+    }
+
+    @Bean
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory factory,
             ChatCreatedListener chatCreatedListener,
             ChatsReceivedListener chatsReceivedListener,
             ChatReceivedListener chatReceivedListener,
             ChatEditedListener chatEditedListener,
-            ChatDeletedListener chatDeletedListener
+            ChatDeletedListener chatDeletedListener,
+            MessageSentListener messageSentListener
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(factory);
@@ -71,6 +77,11 @@ public class RedisConfig {
         container.addMessageListener(
                 chatDeletedListener,
                 chatDeletedTopic()
+        );
+
+        container.addMessageListener(
+                messageSentListener,
+                messageSentTopic()
         );
 
         return container;

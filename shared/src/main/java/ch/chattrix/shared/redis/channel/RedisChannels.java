@@ -11,4 +11,6 @@ public class RedisChannels {
     public static final String CHAT_EDITED = "chat.edited";
     public static final String CHAT_DELETE = "chat.delete";
     public static final String CHAT_DELETED = "chat.deleted";
+    public static final String MESSAGE_SEND = "message.send";
+    public static final String MESSAGE_SENT = "message.sent";
 }

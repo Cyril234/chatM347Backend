@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ChatDto {
+public class ChatResponse {
     private UUID chatUuid;
     private UUID creatorUuid;
     private ChatType chatType;

@@ -2,7 +2,7 @@ package ch.chattrix.chatservice.redis;
 
 import ch.chattrix.chatservice.model.Chat;
 import ch.chattrix.chatservice.repository.ChatRepository;
-import ch.chattrix.shared.dto.ChatDto;
+import ch.chattrix.shared.dto.ChatResponse;
 import ch.chattrix.shared.redis.channel.RedisChannels;
 import ch.chattrix.shared.redis.event.ChatEditEvent;
 import ch.chattrix.shared.redis.event.ChatEditedEvent;
@@ -58,16 +58,16 @@ public class EditChatListener implements MessageListener {
 
             Chat saved = chatRepository.save(chat);
 
-            ChatDto chatDto = new ChatDto();
-            chatDto.setChatUuid(saved.getChatUuid());
-            chatDto.setName(saved.getName());
-            chatDto.setCreatorUuid(saved.getCreatorUuid());
-            chatDto.setChatType(saved.getChatType());
-            chatDto.setMemberUuids(saved.getMemberUuids());
-            chatDto.setCreatedAt(saved.getCreatedAt());
+            ChatResponse chatResponse = new ChatResponse();
+            chatResponse.setChatUuid(saved.getChatUuid());
+            chatResponse.setName(saved.getName());
+            chatResponse.setCreatorUuid(saved.getCreatorUuid());
+            chatResponse.setChatType(saved.getChatType());
+            chatResponse.setMemberUuids(saved.getMemberUuids());
+            chatResponse.setCreatedAt(saved.getCreatedAt());
 
             ChatEditedEvent editedEvent = ChatEditedEvent.builder()
-                    .chat(chatDto)
+                    .chat(chatResponse)
                     .build();
 
             redisTemplate.convertAndSend(

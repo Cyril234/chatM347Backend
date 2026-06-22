@@ -2,7 +2,7 @@ package ch.chattrix.chatservice.redis;
 
 import ch.chattrix.chatservice.model.Chat;
 import ch.chattrix.chatservice.repository.ChatRepository;
-import ch.chattrix.shared.dto.ChatDto;
+import ch.chattrix.shared.dto.ChatResponse;
 import ch.chattrix.shared.redis.channel.RedisChannels;
 import ch.chattrix.shared.redis.event.ChatsGetEvent;
 import ch.chattrix.shared.redis.event.ChatsReceivedEvent;
@@ -32,8 +32,8 @@ public class GetChatsListener implements MessageListener {
 
             List<Chat> chats = chatRepository.findByMemberUuidsContaining(event.getUserUuid());
 
-            List<ChatDto> chatDtos = chats.stream().map(chat -> {
-                ChatDto dto = new ChatDto();
+            List<ChatResponse> chatResponses = chats.stream().map(chat -> {
+                ChatResponse dto = new ChatResponse();
                 dto.setChatUuid(chat.getChatUuid());
                 dto.setName(chat.getName());
                 dto.setCreatorUuid(chat.getCreatorUuid());
@@ -45,7 +45,7 @@ public class GetChatsListener implements MessageListener {
 
             ChatsReceivedEvent response = ChatsReceivedEvent.builder()
                     .userUuid(event.getUserUuid())
-                    .chats(chatDtos)
+                    .chats(chatResponses)
                     .build();
 
             redisTemplate.convertAndSend(

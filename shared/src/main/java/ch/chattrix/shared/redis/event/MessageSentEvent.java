@@ -1,16 +1,19 @@
 package ch.chattrix.shared.redis.event;
 
-import ch.chattrix.shared.dto.ChatResponse;
+import ch.chattrix.shared.dto.MessageResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatCreatedEvent {
-    private ChatResponse chat;
-    private long createdAt;
+public class MessageSentEvent {
+    private MessageResponse message;
+    private List<UUID> memberUuids;
 }

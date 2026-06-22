@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "messages")
-public class Message {
+public class ChatMessage {
     @Id
     private String id;
     private UUID messageUuid;

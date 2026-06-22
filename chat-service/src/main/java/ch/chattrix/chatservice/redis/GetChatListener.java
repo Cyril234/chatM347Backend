@@ -2,7 +2,7 @@ package ch.chattrix.chatservice.redis;
 
 import ch.chattrix.chatservice.model.Chat;
 import ch.chattrix.chatservice.repository.ChatRepository;
-import ch.chattrix.shared.dto.ChatDto;
+import ch.chattrix.shared.dto.ChatResponse;
 import ch.chattrix.shared.redis.channel.RedisChannels;
 import ch.chattrix.shared.redis.event.ChatGetEvent;
 import ch.chattrix.shared.redis.event.ChatReceivedEvent;
@@ -48,17 +48,17 @@ public class GetChatListener implements MessageListener {
                 return;
             }
 
-            ChatDto chatDto = new ChatDto();
-            chatDto.setChatUuid(chat.getChatUuid());
-            chatDto.setChatType(chat.getChatType());
-            chatDto.setName(chat.getName());
-            chatDto.setMemberUuids(chat.getMemberUuids());
-            chatDto.setCreatorUuid(chat.getCreatorUuid());
-            chatDto.setCreatedAt(chat.getCreatedAt());
+            ChatResponse chatResponse = new ChatResponse();
+            chatResponse.setChatUuid(chat.getChatUuid());
+            chatResponse.setChatType(chat.getChatType());
+            chatResponse.setName(chat.getName());
+            chatResponse.setMemberUuids(chat.getMemberUuids());
+            chatResponse.setCreatorUuid(chat.getCreatorUuid());
+            chatResponse.setCreatedAt(chat.getCreatedAt());
 
             ChatReceivedEvent response = ChatReceivedEvent.builder()
                     .userUuid(userUuid)
-                    .chat(chatDto)
+                    .chat(chatResponse)
                     .build();
 
             redisTemplate.convertAndSend(

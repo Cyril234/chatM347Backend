@@ -1,6 +1,6 @@
 package ch.chattrix.shared.redis.event;
 
-import ch.chattrix.shared.dto.ChatDto;
+import ch.chattrix.shared.dto.ChatResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +14,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ChatReceivedEvent {
     private UUID userUuid;
-    private ChatDto chat;
+    private ChatResponse chat;
 }

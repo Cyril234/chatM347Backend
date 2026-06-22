@@ -1,6 +1,6 @@
 package ch.chattrix.websocketservice.redis;
 
-import ch.chattrix.shared.redis.event.ChatEditedEvent;
+import ch.chattrix.shared.redis.event.MessageSentEvent;
 import ch.chattrix.websocketservice.registry.WebSocketSessionRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class ChatEditedListener implements MessageListener {
+public class MessageSentListener implements MessageListener {
 
     private final ObjectMapper objectMapper;
     private final WebSocketSessionRegistry sessionRegistry;
@@ -24,16 +24,14 @@ public class ChatEditedListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         try {
 
-            ChatEditedEvent event =
-                    objectMapper.readValue(message.getBody(), ChatEditedEvent.class);
+            MessageSentEvent event =
+                    objectMapper.readValue(message.getBody(), MessageSentEvent.class);
 
-            if (event.getChat() == null || event.getChat().getMemberUuids() == null) {
-                return;
-            }
+            UUID chatUuid = event.getMessage().getChatUuid();
 
             String payload = objectMapper.writeValueAsString(event);
 
-            for (UUID userUuid : event.getChat().getMemberUuids()) {
+            for (UUID userUuid : event.getMemberUuids()) {
 
                 WebSocketSession session = sessionRegistry.get(userUuid);
 
